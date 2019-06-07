@@ -12,6 +12,11 @@ abstract class BaseDriver implements DriverInterface
   protected $apiURL    = 'localhost';
   protected $protocol  = 'http';
   protected $accessKey = null;
+  protected $headers   = [
+    'Accept'       => 'application/json',
+    'Content-Type' => 'application/json',
+  ];
+
 
   protected $currencies   = [];
   protected $baseCurrency = 'USD';
@@ -140,7 +145,7 @@ abstract class BaseDriver implements DriverInterface
    *
    * @return self
    */
-  public function setAccessKey(string $accessKey): DriverInterface
+  public function accessKey(string $accessKey): DriverInterface
   {
     $this->accessKey = $accessKey;
     return $this;

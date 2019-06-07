@@ -11,35 +11,34 @@ use PHPUnit\Framework\TestCase;
  */
 class DriverTest extends TestCase
 {
-    /** @test */
-    public function can_init_driver()
-    {
-        $this->assertInstanceOf(DriverInterface::class, API::make('mock'));
-    }
+  /** @test */
+  public function can_init_driver()
+  {
+    $this->assertInstanceOf(DriverInterface::class, API::make('mock'));
+  }
 
-    /** @test */
-    public function init_will_properly_set_parameters()
-    {
-        $api = API::make('mock', Symbol::ANG, [Symbol::DKK, Symbol::USD]);
-        $this->assertEquals([Symbol::DKK, Symbol::USD], $api->getSymbols());
-        $this->assertEquals(Symbol::ANG, $api->getBaseCurrency());
-    }
+  /** @test */
+  public function init_will_properly_set_parameters()
+  {
+    $api = API::make('mock')->source(Symbol::ANG)->currencies([Symbol::DKK, Symbol::USD]);
+    $this->assertEquals([Symbol::DKK, Symbol::USD], $api->getSymbols());
+    $this->assertEquals(Symbol::ANG, $api->getBaseCurrency());
+  }
 
-    /** @test */
-    public function will_throw_exception_if_using_invalid_driver()
-    {
-        $this->expectException(DriverNotFoundException::class);
+  /** @test */
+  public function will_throw_exception_if_using_invalid_driver()
+  {
+    $this->expectException(DriverNotFoundException::class);
 
-        API::make('nonexistent-currency-api-driver');
-    }
+    API::make('nonexistent-currency-api-driver');
+  }
 
-
-    /** @test */
-    public function will_properly_switch_to_https()
-    {
-        $api = API::make('mock', Symbol::ANG, [Symbol::DKK, Symbol::USD]);
-        $this->assertEquals($api->getProtocol(), 'http');
-        $api->secure();
-        $this->assertEquals($api->getProtocol(), 'https');
-    }
+  /** @test */
+  public function will_properly_switch_to_https()
+  {
+    $api = API::make('mock');
+    $this->assertEquals($api->getProtocol(), 'http');
+    $api->secure();
+    $this->assertEquals($api->getProtocol(), 'https');
+  }
 }

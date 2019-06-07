@@ -22,13 +22,13 @@ class MockDriver extends BaseDriver implements DriverInterface
   }
 
   /**
+   * @param double|integer|float $amount
    * @param string               $fromCurrency
    * @param string               $toCurrency
-   * @param double|integer|float $amount
    *
    * @return array
    */
-  public function convert(string $fromCurrency = null, string $toCurrency = null, $amount = null): array
+  public function convert($amount = null, string $fromCurrency = null, string $toCurrency = null): array
   {
     return [];
   }

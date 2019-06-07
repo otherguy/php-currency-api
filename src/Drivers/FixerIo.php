@@ -1,7 +1,8 @@
 <?php namespace Otherguy\Currency\Drivers;
 
 use DateTime;
-use Requests;
+use GuzzleHttp\Client as HTTPClient;
+use Otherguy\Currency\Exceptions\MissingAccessKeyException;
 
 /**
  * Class FixerIo
@@ -10,33 +11,53 @@ use Requests;
  */
 class FixerIo extends BaseDriver implements DriverInterface
 {
-  protected $apiURL = 'fixerio.com';
+  protected $protocol = 'http';
+  protected $apiURL   = 'data.fixer.io/api';
 
-  protected $headers = [
-    'Accept'       => 'application/json',
-    'Content-Type' => 'application/json',
-  ];
+  /** @var string $baseCurrency Fixer.io's Free Plan base currency is 'EUR' */
+  protected $baseCurrency = 'EUR';
 
 
+  /**
+   * @param string|null $forCurrency
+   *
+   * @return array
+   *
+   * @throws MissingAccessKeyException
+   */
   public function get(string $forCurrency = null): array
   {
-    $request = Requests::get($this->getAPIUrl('live'), $this->headers);
+    if ($this->accessKey == null) {
+      throw new MissingAccessKeyException();
+    }
 
-    //var_dump($request->status_code);
+    $client = new HTTPClient();
+    $response = $client->get($this->getAPIUrl('latest'), [ 'query' => [
+      'access_key' => $this->accessKey,
+      'base'       => $this->getBaseCurrency(),
+      'symbols'    => join(',', $this->getSymbols()),
+    ]]);
 
-    var_dump($request->body);
-    return [];
+    // echo $response->getStatusCode(); # 200
+
+    return (array)json_decode($response->getBody()->getContents());
   }
 
   /**
+   * @param double|integer|float $amount
    * @param string               $fromCurrency
    * @param string               $toCurrency
-   * @param double|integer|float $amount
    *
    * @return array
+   *
+   * @throws MissingAccessKeyException
    */
-  public function convert(string $fromCurrency = null, string $toCurrency = null, $amount = null): array
+  public function convert($amount = null, string $fromCurrency = null, string $toCurrency = null): array
   {
+    if ($this->accessKey == null) {
+      throw new MissingAccessKeyException();
+    }
+
     return [];
   }
 
@@ -45,9 +66,14 @@ class FixerIo extends BaseDriver implements DriverInterface
    * @param null|string     $forCurrency
    *
    * @return array
+   *
+   * @throws MissingAccessKeyException
    */
   public function historical($date = null, string $forCurrency = null): array
   {
+    if ($this->accessKey == null) {
+      throw new MissingAccessKeyException();
+    }
     return [];
   }
 }

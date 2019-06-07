@@ -72,13 +72,13 @@ interface DriverInterface
   public function get(string $forCurrency = null): array;
 
   /**
+   * @param double|integer|float $amount
    * @param string               $fromCurrency
    * @param string               $toCurrency
-   * @param double|integer|float $amount
    *
    * @return array
    */
-  public function convert(string $fromCurrency = null, string $toCurrency = null, $amount = null): array;
+  public function convert($amount = null, string $fromCurrency = null, string $toCurrency = null): array;
 
   /**
    * @param string|DateTime $date
@@ -95,7 +95,7 @@ interface DriverInterface
    *
    * @return DriverInterface
    */
-  public function setAccessKey(string $accessKey): DriverInterface;
+  public function accessKey(string $accessKey): DriverInterface;
 
   /**
    * Secures all HTTP requests by switching to HTTPS.

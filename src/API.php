@@ -12,17 +12,13 @@ class API
 {
   /**
    * @param string $driver
-   * @param string $base
-   * @param array  $symbols
    *
    * @return DriverInterface
    *
    * @throws DriverNotFoundException
    */
-  public static function make(string $driver, string $base = 'USD', array $symbols = []): DriverInterface
+  public static function make(string $driver): DriverInterface
   {
-    return (DriverFactory::make($driver))
-      ->source($base)
-      ->currencies($symbols);
+    return (DriverFactory::make($driver));
   }
 }
