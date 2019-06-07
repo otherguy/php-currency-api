@@ -9,98 +9,121 @@ use DateTime;
  */
 interface DriverInterface
 {
-    /**
-     * @param string $baseCurrency
-     *
-     * @return self
-     */
-    public function setBase(string $baseCurrency): DriverInterface;
+  /**
+   * @param string $baseCurrency
+   *
+   * @return self
+   */
+  public function source(string $baseCurrency): DriverInterface;
 
-    /**
-     * @param array $symbols
-     *
-     * @return self
-     */
-    public function setSymbols(array $symbols): DriverInterface;
+  /**
+   * @param array $symbols
+   *
+   * @return self
+   */
+  public function currencies(array $symbols): DriverInterface;
 
-    /**
-     * @return string
-     */
-    public function getBaseCurrency(): string;
+  /**
+   * @param double|integer|float $amount
+   *
+   * @return self
+   */
+  public function amount($amount): DriverInterface;
 
-    /**
-     * @return array
-     */
-    public function getSymbols(): array;
+  /**
+   * @param string|DateTime $date
+   *
+   * @return self
+   */
+  public function date($date): DriverInterface;
 
-    /**
-     * @return array
-     */
-    public function symbols(): array;
+  /**
+   * @param string|DateTime $startDate
+   *
+   * @return self
+   */
+  public function start_date($startDate): DriverInterface;
 
-    /**
-     * @param null|string $forCurrency
-     *
-     * @return array
-     */
-    public function get(string $forCurrency = null): array;
+  /**
+   * @param string|DateTime $endDate
+   *
+   * @return self
+   */
+  public function end_date($endDate): DriverInterface;
 
-    /**
-     * @param string               $fromCurrency
-     * @param string               $toCurrency
-     * @param double|integer|float $amount
-     *
-     * @return array
-     */
-    public function convert(string $fromCurrency, string $toCurrency, $amount): array;
+  /**
+   * @param string|DateTime $startDate
+   * @param string|DateTime $endDate
+   *
+   * @return self
+   */
+  public function between($startDate, $endDate): DriverInterface;
 
-    /**
-     * @param string|DateTime $date
-     * @param null|string     $forCurrency
-     *
-     * @return array
-     */
-    public function historical($date, string $forCurrency = null): array;
+  /**
+   * @return array
+   */
+  public function getSymbols(): array;
 
-    /**
-     * @param string|DateTime $fromDate
-     * @param string|DateTime $toDate
-     *
-     * @return array
-     */
-    public function between($fromDate, $toDate): array;
+  /**
+   * @param null|string $forCurrency
+   *
+   * @return array
+   */
+  public function get(string $forCurrency = null): array;
 
-    /**
-     * @param string|DateTime $fromDate
-     * @param string|DateTime $toDate
-     *
-     * @return array
-     */
-    public function fluctuationBetween($fromDate, $toDate): array;
+  /**
+   * @param string               $fromCurrency
+   * @param string               $toCurrency
+   * @param double|integer|float $amount
+   *
+   * @return array
+   */
+  public function convert(string $fromCurrency = null, string $toCurrency = null, $amount = null): array;
 
-    /**
-     * Secures all HTTP requests by switching to HTTPS.
-     *
-     * Note: Most free APIs do not support this!
-     *
-     * @return self
-     */
-    public function secure(): DriverInterface;
+  /**
+   * @param string|DateTime $date
+   * @param null|string     $forCurrency
+   *
+   * @return array
+   */
+  public function historical($date = null, string $forCurrency = null): array;
 
-    /**
-     * Returns the protocol that is currently being used.
-     *
-     * @return string
-     */
-    public function getProtocol() : string;
+  /**
+   * Sets the API key to use.
+   *
+   * @param string $accessKey Your API key.
+   *
+   * @return DriverInterface
+   */
+  public function setAccessKey(string $accessKey): DriverInterface;
 
+  /**
+   * Secures all HTTP requests by switching to HTTPS.
+   *
+   * Note: Most free APIs do not support this!
+   *
+   * @return self
+   */
+  public function secure(): DriverInterface;
 
-    /**
-     * Sets the API key to use.
-     *
-     * @param string $accessKey Your API key.
-     *
-     * @return DriverInterface
-     */
-    public function setAccessKey(string $accessKey): DriverInterface;
+  /**
+   * Returns the protocol that is currently being used.
+   *
+   * @return string
+   */
+  public function getProtocol(): string;
+
+  /**
+   * Returns the API URL to use.
+   *
+   * @param string $endpoint
+   *
+   * @return string
+   */
+  public function getAPIUrl(string $endpoint): string;
+
+  /**
+   * @return string
+   */
+  public function getBaseCurrency(): string;
 }

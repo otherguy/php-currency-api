@@ -1,5 +1,7 @@
 <?php namespace Otherguy\Currency\Drivers;
 
+use DateTime;
+
 /**
  * Class MockDriver
  *
@@ -7,33 +9,38 @@
  */
 class MockDriver extends BaseDriver implements DriverInterface
 {
-    public function symbols(): array
-    {
-        return [];
-    }
+  protected $apiURL    = 'localhost';
 
-    public function convert(string $fromCurrency, string $toCurrency, $amount): array
-    {
-        return [];
-    }
+  /**
+   * @param null|string $forCurrency
+   *
+   * @return array
+   */
+  public function get(string $forCurrency = null): array
+  {
+    return [];
+  }
 
-    public function get(string $forCurrency = null): array
-    {
-        return [];
-    }
+  /**
+   * @param string               $fromCurrency
+   * @param string               $toCurrency
+   * @param double|integer|float $amount
+   *
+   * @return array
+   */
+  public function convert(string $fromCurrency = null, string $toCurrency = null, $amount = null): array
+  {
+    return [];
+  }
 
-    public function historical($date, string $forCurrency = null): array
-    {
-        return [];
-    }
-
-    public function between($fromDate, $toDate): array
-    {
-        return [];
-    }
-
-    public function fluctuationBetween($fromDate, $toDate): array
-    {
-        return [];
-    }
+  /**
+   * @param string|DateTime $date
+   * @param null|string     $forCurrency
+   *
+   * @return array
+   */
+  public function historical($date = null, string $forCurrency = null): array
+  {
+    return [];
+  }
 }
