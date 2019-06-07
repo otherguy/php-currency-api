@@ -1,0 +1,44 @@
+{
+	"name": "otherguy/php-currency-api",
+	"description": "Wrapper for multiple currency rate APIs",
+	"keywords": [
+		"currency",
+		"currency rates",
+		"exchange rates",
+		"currency conversion",
+		"api"
+	],
+	"type": "library",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Alexander Graf",
+			"email": "alex@otherguy.io"
+		}
+	],
+	"require": {
+		"php": ">=7.1",
+		"rmccue/requests": ">=1.7"
+	},
+	"require-dev": {
+		"php-coveralls/php-coveralls": "^2.1",
+		"phpunit/php-code-coverage": "^6.1",
+		"phpunit/phpunit": "^7.0"
+	},
+	"suggest": {
+		"ext-curl": "Faster HTTP requests"
+	},
+	"autoload": {
+		"psr-4": {
+			"Otherguy\\Currency\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Currency\\Tests\\": "tests/"
+		}
+	},
+	"config": {
+		"sort-packages": true
+	}
+}

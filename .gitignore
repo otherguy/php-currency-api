@@ -1,0 +1,16 @@
+### VisualStudioCode template
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+### Composer template
+composer.phar
+/vendor/
+
+### JetBrains template
+.idea/
+
+### PHPUnit
+build
