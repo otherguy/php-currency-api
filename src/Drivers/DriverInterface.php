@@ -65,11 +65,11 @@ interface DriverInterface
   public function getSymbols(): array;
 
   /**
-   * @param null|string $forCurrency
+   * @param null|string|array $forCurrency
    *
    * @return array
    */
-  public function get(string $forCurrency = null): array;
+  public function get($forCurrency = []): array;
 
   /**
    * @param double|integer|float $amount

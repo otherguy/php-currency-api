@@ -19,16 +19,20 @@ class FixerIo extends BaseDriver implements DriverInterface
 
 
   /**
-   * @param string|null $forCurrency
+   * @param null|string|array $forCurrency
    *
    * @return array
    *
    * @throws MissingAccessKeyException
    */
-  public function get(string $forCurrency = null): array
+  public function get($forCurrency = []): array
   {
     if ($this->accessKey == null) {
       throw new MissingAccessKeyException();
+    }
+
+    if(!empty((array)$forCurrency)) {
+      $this->currencies((array)$forCurrency);
     }
 
     $client = new HTTPClient();

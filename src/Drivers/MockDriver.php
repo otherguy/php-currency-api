@@ -12,11 +12,11 @@ class MockDriver extends BaseDriver implements DriverInterface
   protected $apiURL    = 'localhost';
 
   /**
-   * @param null|string $forCurrency
+   * @param null|string|array $forCurrency
    *
    * @return array
    */
-  public function get(string $forCurrency = null): array
+  public function get($forCurrency = []): array
   {
     return [];
   }
