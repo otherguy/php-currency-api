@@ -23,7 +23,7 @@ was just a stub and not implemented.
 ## Prerequisites
 
 * PHP 7.1+
-* An account with one of the APIs above
+* An account with one of the API providers above
 
 ## Installation
 
