@@ -11,9 +11,9 @@ Dont worry about your favorite currency conversion service suddenly shutting dow
 
 ## Inspiration
 
-I needed a currency conversion API for [my travel website]() but couldn't find a good PHP package. The idea of the 
-[`Rackbeat/php-currency-api`](https://github.com/Rackbeat/php-currency-api) package came closest but unfortunately it 
-was just a stub and not implemented. 
+I needed a currency conversion API for [my travel website]() but couldn't find a good PHP package. The idea of the
+[`Rackbeat/php-currency-api`](https://github.com/Rackbeat/php-currency-api) package came closest but unfortunately it
+was just a stub and not implemented.
 
 ## Supported APIs
 
@@ -27,7 +27,7 @@ was just a stub and not implemented.
 
 ## Prerequisites
 
-* PHP 7.1 or higher (Tested on: PHP 7.1 ✅, 7.2 ✅ and 7.3 ✅)
+* `PHP 7.1` or higher (Tested on: PHP `7.1` ✅, `7.2` ✅ and `7.3` ✅)
 * [Composer](https://getcomposer.org)
 * An account with one or more of the API providers above
 
