@@ -1,6 +1,7 @@
 <?php namespace Otherguy\Currency\Exceptions;
 
 use Exception;
+use Throwable;
 
 /**
  * Class CurrencyException
@@ -9,5 +10,4 @@ use Exception;
  */
 class CurrencyException extends Exception
 {
-
 }

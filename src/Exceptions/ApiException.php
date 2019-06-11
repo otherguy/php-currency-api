@@ -1,11 +1,11 @@
 <?php namespace Otherguy\Currency\Exceptions;
 
 /**
- * Class ApiBillingException
+ * Class ApiException
  *
  * @package Otherguy\Currency\Exceptions
  */
-class ApiBillingException extends CurrencyException
+class ApiException extends CurrencyException
 {
 
 }

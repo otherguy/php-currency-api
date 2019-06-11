@@ -1,6 +1,7 @@
 <?php namespace Otherguy\Currency\Drivers;
 
 use DateTime;
+use Otherguy\Currency\Results\ConversionResult;
 
 /**
  * Class MockDriver
@@ -12,34 +13,46 @@ class MockDriver extends BaseDriver implements DriverInterface
   protected $apiURL    = 'localhost';
 
   /**
-   * @param null|string|array $forCurrency
+   * @param string|array $forCurrency
    *
-   * @return array
+   * @return ConversionResult
    */
-  public function get($forCurrency = []): array
+  function get($forCurrency = []): ConversionResult
   {
-    return [];
+    return new ConversionResult($this->getBaseCurrency(), time(), []);
   }
 
   /**
-   * @param double|integer|float $amount
-   * @param string               $fromCurrency
-   * @param string               $toCurrency
+   * Converts any amount in a given currency to another currency.
    *
-   * @return array
+   * @param float  $amount       The amount to convert.
+   * @param string $fromCurrency The base currency.
+   * @param string $toCurrency   The target currency.
+   *
+   * @return float The conversion result.
    */
-  public function convert($amount = null, string $fromCurrency = null, string $toCurrency = null): array
+  function convert(float $amount = null, string $fromCurrency = null, string $toCurrency = null): float
   {
-    return [];
+    return 12.34;
   }
 
   /**
-   * @param string|DateTime $date
-   * @param null|string     $forCurrency
+   * @param int|string|DateTime $date
+   * @param string|array        $forCurrency
+   *
+   * @return ConversionResult
+   */
+  function historical($date = null, $forCurrency = []): ConversionResult
+  {
+    return new ConversionResult($this->getBaseCurrency(), time(), []);
+  }
+
+  /**
+   * Returns an array of default HTTP params.
    *
    * @return array
    */
-  public function historical($date = null, string $forCurrency = null): array
+  public function getDefaultParams() : array
   {
     return [];
   }

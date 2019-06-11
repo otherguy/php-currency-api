@@ -6,17 +6,17 @@ use Otherguy\Currency\Exceptions\CurrencyException;
 use Otherguy\Currency\Results\ConversionResult;
 
 /**
- * Class FixerIo
+ * Class CurrencyLayer
  *
  * @package Otherguy\Currency\Drivers
  */
-class FixerIo extends BaseDriver implements DriverInterface
+class CurrencyLayer extends BaseDriver implements DriverInterface
 {
   protected $protocol = 'http';
-  protected $apiURL   = 'data.fixer.io/api';
+  protected $apiURL   = 'apilayer.net/api/';
 
-  /** @var string $baseCurrency Fixer.io's Free Plan base currency is 'EUR' */
-  protected $baseCurrency = 'EUR';
+  /** @var string $baseCurrency CurrencyLayer's Free Plan base currency is 'USD' */
+  protected $baseCurrency = 'USD';
 
 
   /**
@@ -33,12 +33,18 @@ class FixerIo extends BaseDriver implements DriverInterface
     }
 
     // Get API response
-    $response = $this->apiRequest('latest', [
-      'base'    => $this->getBaseCurrency(),
-      'symbols' => join(',', $this->getSymbols())
+    $response = $this->apiRequest('live', [
+      'source'     => $this->getBaseCurrency(),
+      'currencies' => join(',', $this->getSymbols())
     ]);
 
-    return new ConversionResult($response['base'], $response['date'], $response['rates']);
+    // Transform rates response
+    $rates = [];
+    foreach($response['quotes'] as $currency => $rate) {
+      $rates[substr($currency, 3, 3)] = $rate;
+    }
+
+    return new ConversionResult($response['source'], $response['timestamp'], $rates);
   }
 
   /**
@@ -96,12 +102,19 @@ class FixerIo extends BaseDriver implements DriverInterface
     }
 
     // Get API response
-    $response = $this->apiRequest($this->date, [
-      'base'    => $this->getBaseCurrency(),
-      'symbols' => join(',', $this->getSymbols())
+    $response = $this->apiRequest('historical', [
+      'date'       => $this->date,
+      'source'     => $this->getBaseCurrency(),
+      'currencies' => join(',', $this->getSymbols())
     ]);
 
-    return new ConversionResult($response['base'], $response['date'], $response['rates']);
+    // Transform rates response
+    $rates = [];
+    foreach($response['quotes'] as $currency => $rate) {
+      $rates[substr($currency, 3, 3)] = $rate;
+    }
+
+    return new ConversionResult($response['source'], $response['timestamp'], $rates);
   }
 
   /**
@@ -143,6 +156,7 @@ class FixerIo extends BaseDriver implements DriverInterface
   {
     return [
       'access_key' => $this->accessKey,
+      'format'     => 1,
     ];
   }
 }

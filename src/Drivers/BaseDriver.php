@@ -1,6 +1,11 @@
 <?php namespace Otherguy\Currency\Drivers;
 
 use DateTime;
+use GuzzleHttp\Client as HTTPClient;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Middleware;
+use Otherguy\Currency\Middleware\JsonAwareResponse;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class BaseDriver
@@ -17,13 +22,26 @@ abstract class BaseDriver implements DriverInterface
     'Content-Type' => 'application/json',
   ];
 
-
   protected $currencies   = [];
   protected $baseCurrency = 'USD';
   protected $amount       = 0.00;
   protected $date         = null;
-  protected $start_date   = null;
-  protected $end_date     = null;
+
+  protected $httpClient   = null;
+  protected $clientConfig = [
+    'http_errors'     => true,
+    'timeout'         => 30,
+    'allow_redirects' => true,
+    'decode_content'  => true
+  ];
+
+  /**
+   * BaseDriver constructor.
+   */
+  public function __construct()
+  {
+    $this->httpClient = $this->makeHttpClient();
+  }
 
   /**
    * @param string $baseCurrency
@@ -37,14 +55,42 @@ abstract class BaseDriver implements DriverInterface
   }
 
   /**
-   * @param array $symbols
+   * Alias for 'source'.
+   *
+   * @see DriverInterface::source()
+   *
+   * @param string $baseCurrency
+   *
+   * @return DriverInterface
+   */
+  public function from(string $baseCurrency): DriverInterface
+  {
+    return $this->source($baseCurrency);
+  }
+
+  /**
+   * @param string|array $symbols
    *
    * @return self
    */
-  public function currencies(array $symbols = []): DriverInterface
+  public function currencies($symbols = []): DriverInterface
   {
     $this->currencies = (array)$symbols;
     return $this;
+  }
+
+  /**
+   * Alias for 'currencies'.
+   *
+   * @see DriverInterface::currencies()
+   *
+   * @param array $symbols
+   *
+   * @return DriverInterface
+   */
+  public function to($symbols = []): DriverInterface
+  {
+    return $this->currencies($symbols);
   }
 
   /**
@@ -59,51 +105,22 @@ abstract class BaseDriver implements DriverInterface
   }
 
   /**
-   * @param string|DateTime $date
+   * @param int|string|DateTime $date
    *
    * @return self
    */
   public function date($date): DriverInterface
   {
-    $this->date = $date;
+    if (is_integer($date)) {
+      $this->date = date('Y-m-d', $date);
+    } else if ($date instanceof DateTime) {
+      $this->date = $date->format('Y-m-d');
+    } else if (is_string($date)) {
+      $this->date = date('Y-m-d', strtotime($date));
+    }
+
     return $this;
   }
-
-  /**
-   * @param string|DateTime $startDate
-   *
-   * @return self
-   */
-  public function start_date($startDate): DriverInterface
-  {
-    $this->start_date = $startDate;
-    return $this;
-  }
-
-  /**
-   * @param string|DateTime $endDate
-   *
-   * @return self
-   */
-  public function end_date($endDate): DriverInterface
-  {
-    $this->end_date = $endDate;
-    return $this;
-  }
-
-  /**
-   * @param string|DateTime $startDate
-   * @param string|DateTime $endDate
-   *
-   * @return self
-   */
-  public function between($startDate, $endDate): DriverInterface
-  {
-    $this->start_date = $startDate;
-    $this->end_date = $endDate;
-    return $this;
-  }
-
   /**
    * @return array
    */
@@ -125,7 +142,8 @@ abstract class BaseDriver implements DriverInterface
    */
   public function secure(): DriverInterface
   {
-    $this->protocol = 'https';
+    $this->protocol   = 'https';
+    $this->httpClient = $this->makeHttpClient();
 
     return $this;
   }
@@ -152,12 +170,50 @@ abstract class BaseDriver implements DriverInterface
   }
 
   /**
-   * @param string $endpoint
+   * Performs an HTTP request.
    *
-   * @return string
+   * @param string $endpoint The API endpoint.
+   * @param array  $params   The URL query parameters.
+   * @param string $method   The HTTP method (defaults to 'GET').
+   *
+   * @return array|string|bool The response as decoded JSON.
    */
-  public function getAPIUrl(string $endpoint): string
+  public function apiRequest(string $endpoint, array $params = [], string $method = 'GET')
   {
-    return sprintf('%s://%s/%s', $this->getProtocol(), $this->apiURL, $endpoint);
+    try {
+      $response = $this->httpClient
+        ->request($method, $endpoint, [
+          'query' => array_merge($params, $this->getDefaultParams())
+        ])
+        ->getBody();
+    } catch (GuzzleException $e ) {
+      return false;
+    }
+
+    return $response;
+  }
+
+  /**
+   * Creates an instance of HTTPClient
+   *
+   * @return HTTPClient
+   */
+  protected function makeHttpClient(): HTTPClient
+  {
+    $this->clientConfig['base_uri'] = sprintf('%s://%s', $this->getProtocol(), $this->apiURL);
+    $client = new HTTPClient($this->clientConfig);
+
+    // Push JSON decode middleware on the Guzzle middleware stack
+    $client->getConfig('handler')->push(Middleware::mapResponse(function (ResponseInterface $response) {
+      return new JsonAwareResponse(
+        $response->getStatusCode(),
+        $response->getHeaders(),
+        $response->getBody(),
+        $response->getProtocolVersion(),
+        $response->getReasonPhrase()
+      );
+    }), 'json_decode_middleware');
+
+    return $client;
   }
 }

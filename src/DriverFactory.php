@@ -19,6 +19,8 @@ class DriverFactory
         'fixerio'           => FixerIo::class,
         'currencylayer'     => CurrencyLayer::class,
         'openexchangerates' => OpenExchangeRates::class,
+        'ratesapi'          => RatesApi::class,
+        'exchangeratesapi'  => ExchangeRatesApi::class,
     ];
 
     /**

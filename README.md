@@ -16,18 +16,23 @@ was just a stub and not implemented.
 
 ## Supported APIs
 
-* [FixerIO](https://fixer.io) (`fixerio`)
-* [CurrencyLayer](https://currencylayer.com) (`currencylayer`)
-* [Open Exchange Rates](https://openexchangerates.org) (`openexchangerates`)
+| Service                                              | Identifier          |
+|------------------------------------------------------|---------------------|
+| [FixerIO](https://fixer.io)                          | `fixerio`           |
+| [CurrencyLayer](https://currencylayer.com)           | `currencylayer`     |
+| [Open Exchange Rates](https://openexchangerates.org) | `openexchangerates` |
+| [Rates API](http://ratesapi.io)                      | `ratesapi`          |
+| [Exchange Rates API](https://exchangeratesapi.io)    | `exchangeratesapi`  |
 
 ## Prerequisites
 
 * PHP 7.1+
-* An account with one of the API providers above
+* [Composer](https://getcomposer.org)
+* An account with one or more of the API providers above
 
 ## Installation
 
-Just require the package using composer and you're good to go!
+Just require the package using `composer` and you're good to go!
 
 ```bash
 $ composer require otherguy/php-currency-api
@@ -38,7 +43,7 @@ $ composer require otherguy/php-currency-api
 ### Initialize instance
 
 ```php
-$api = Otherguy\Currency\API::make('fixerio'); // driver from supported drivers.
+$api = Otherguy\Currency\API::make('fixerio'); // driver identifier from supported drivers.
 ```
 
 ### Set base currency (default = USD)

@@ -19,6 +19,6 @@ class API
    */
   public static function make(string $driver): DriverInterface
   {
-    return (DriverFactory::make($driver));
+    return DriverFactory::make($driver);
   }
 }

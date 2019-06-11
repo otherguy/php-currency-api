@@ -1,6 +1,8 @@
 <?php namespace Otherguy\Currency\Drivers;
 
 use DateTime;
+use Otherguy\Currency\Exceptions\CurrencyException;
+use Otherguy\Currency\Results\ConversionResult;
 
 /**
  * Interface DriverInterface
@@ -14,79 +16,66 @@ interface DriverInterface
    *
    * @return self
    */
-  public function source(string $baseCurrency): DriverInterface;
+  function source(string $baseCurrency): DriverInterface;
+  function from(string $baseCurrency): DriverInterface; // Alias
 
   /**
-   * @param array $symbols
+   * @param string|array $symbols
    *
    * @return self
    */
-  public function currencies(array $symbols): DriverInterface;
+  function currencies($symbols = []): DriverInterface;
+  function to($symbols = []): DriverInterface;
 
   /**
    * @param double|integer|float $amount
    *
    * @return self
    */
-  public function amount($amount): DriverInterface;
+  function amount($amount): DriverInterface;
 
   /**
-   * @param string|DateTime $date
+   * @param int|string|DateTime $date
    *
    * @return self
    */
-  public function date($date): DriverInterface;
-
-  /**
-   * @param string|DateTime $startDate
-   *
-   * @return self
-   */
-  public function start_date($startDate): DriverInterface;
-
-  /**
-   * @param string|DateTime $endDate
-   *
-   * @return self
-   */
-  public function end_date($endDate): DriverInterface;
-
-  /**
-   * @param string|DateTime $startDate
-   * @param string|DateTime $endDate
-   *
-   * @return self
-   */
-  public function between($startDate, $endDate): DriverInterface;
+  function date($date): DriverInterface;
 
   /**
    * @return array
    */
-  public function getSymbols(): array;
+  function getSymbols(): array;
 
   /**
-   * @param null|string|array $forCurrency
+   * @param string|array $forCurrency
    *
-   * @return array
+   * @return ConversionResult
    */
-  public function get($forCurrency = []): array;
+  function get($forCurrency = []): ConversionResult;
 
   /**
-   * @param double|integer|float $amount
-   * @param string               $fromCurrency
-   * @param string               $toCurrency
+   * Converts any amount in a given currency to another currency.
    *
-   * @return array
+   * @param float  $amount       The amount to convert.
+   * @param string $fromCurrency The base currency.
+   * @param string $toCurrency   The target currency.
+   *
+   * @return float The conversion result.
    */
-  public function convert($amount = null, string $fromCurrency = null, string $toCurrency = null): array;
+  function convert(float $amount = null, string $fromCurrency = null, string $toCurrency = null): float;
 
   /**
-   * @param string|DateTime $date
-   * @param null|string     $forCurrency
+   * @param int|string|DateTime $date
+   * @param string|array        $forCurrency
    *
-   * @return array
+   * @return ConversionResult
    */
-  public function historical($date = null, string $forCurrency = null): array;
+  function historical($date = null, $forCurrency = []): ConversionResult;
+
+  /**
+   * @return string
+   */
+  function getBaseCurrency(): string;
 
   /**
    * Sets the API key to use.
@@ -95,7 +84,7 @@ interface DriverInterface
    *
    * @return DriverInterface
    */
-  public function accessKey(string $accessKey): DriverInterface;
+  function accessKey(string $accessKey): DriverInterface;
 
   /**
    * Secures all HTTP requests by switching to HTTPS.
@@ -104,26 +93,30 @@ interface DriverInterface
    *
    * @return self
    */
-  public function secure(): DriverInterface;
+  function secure(): DriverInterface;
 
   /**
    * Returns the protocol that is currently being used.
    *
    * @return string
    */
-  public function getProtocol(): string;
+  function getProtocol(): string;
 
   /**
-   * Returns the API URL to use.
+   * Returns an array of default HTTP params.
    *
-   * @param string $endpoint
-   *
-   * @return string
+   * @return array
    */
-  public function getAPIUrl(string $endpoint): string;
+  function getDefaultParams(): array;
 
   /**
-   * @return string
+   * Performs an HTTP request.
+   *
+   * @param string $endpoint The API endpoint.
+   * @param array  $params   The URL query parameters.
+   * @param string $method   The HTTP method (defaults to 'GET').
+   *
+   * @return array|string|bool The response as decoded JSON.
    */
-  public function getBaseCurrency(): string;
+  function apiRequest(string $endpoint, array $params = [], string $method = 'GET');
 }
