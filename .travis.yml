@@ -1,17 +1,17 @@
 language: php
 
 php:
-  - 7.1
-  - 7.2
-  - 7.3
+  - "7.1"
+  - "7.2"
+  - "7.3"
 
 install:
   - curl -s http://getcomposer.org/installer | php
   - php composer.phar install --dev --no-interaction
 
 script:
-  - mkdir -p build/logs
-  - vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+  - mkdir -p build
+  - vendor/bin/phpunit
 
 after_success:
-  - travis_retry php vendor/bin/php-coveralls
+  - travis_retry php vendor/bin/php-coveralls --coverage_clover build/cov.xml --json_path build/coverage.json
