@@ -1,0 +1,40 @@
+pull_request_rules:
+
+  # If there is at least one positive review and CI passed, merge
+  - name: Automatic merge on CI success and review
+    conditions:
+      - status-success=continuous-integration/travis-ci/pr
+      - "#approved-reviews-by>=1"
+      - base=master
+      - label!=WIP
+    actions:
+      merge:
+        method: squash
+        strict: smart
+
+  # Delete branch after automatic merge
+  - name: Delete branch after merge
+    conditions:
+      - merged
+    actions:
+      delete_head_branch: {}
+
+  # Automatically merge Dependabot Pull Requests
+  - name: Automatic merge for Dependabot pull requests
+    conditions:
+      - author=dependabot[bot]
+      - status-success=continuous-integration/travis-ci/pr
+      - base=master
+    actions:
+      merge:
+        method: squash
+        strict: smart
+
+  # Remove outdated reviews
+  - name: Remove outdated reviews
+    conditions:
+      - base=master
+    actions:
+      dismiss_reviews:
+        approved: True
+        changes_requested: True

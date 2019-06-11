@@ -1,4 +1,5 @@
-# PHP 7 API Wrapper for Popular Currency Rate APIs
+# PHP Currency API
+A PHP 7 API Wrapper for Popular Currency Rate APIs
 
 [![Version](https://img.shields.io/packagist/v/otherguy/php-currency-api.svg?style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
 [![GitHub issues](https://img.shields.io/github/issues/otherguy/php-currency-api.svg?style=flat-square)](https://github.com/otherguy/php-currency-api/issues)
@@ -26,7 +27,7 @@ was just a stub and not implemented.
 
 ## Prerequisites
 
-* PHP 7.1+
+* PHP 7.1 or higher (Tested on: PHP 7.1 ✅, 7.2 ✅ and 7.3 ✅)
 * [Composer](https://getcomposer.org)
 * An account with one or more of the API providers above
 
