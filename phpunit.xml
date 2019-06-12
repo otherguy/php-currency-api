@@ -19,6 +19,7 @@
             <exclude>
                 <directory>./vendor</directory>
                 <directory>./tests</directory>
+                <directory>./examples</directory>
             </exclude>
         </whitelist>
     </filter>
