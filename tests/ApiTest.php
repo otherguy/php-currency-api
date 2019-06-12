@@ -5,7 +5,7 @@ use Otherguy\Currency\Results\ConversionResult;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Class ApiTest
+ * ApiTest
  */
 class ApiTest extends TestCase
 {
