@@ -1,6 +1,7 @@
 <?php namespace Otherguy\Currency\Results;
 
 use DateTime;
+use Otherguy\Currency\Exceptions\CurrencyException;
 use Otherguy\Currency\Exceptions\InvalidCurrencyException;
 
 /**
@@ -32,11 +33,17 @@ class ConversionResult
 
     if (is_integer($date)) {
       $this->timestamp = $date;
-    } else if ($date instanceof DateTime) {
-      $this->timestamp = $date->getTimestamp();
-    } else if (is_string($date)) {
-      $this->timestamp = strtotime($date);
+    } else {
+      if ($date instanceof DateTime) {
+        $this->timestamp = $date->getTimestamp();
+      } else {
+        if (is_string($date)) {
+          $this->timestamp = strtotime($date);
+        }
+      }
     }
+
+    $rates[$baseCurrency] = 1.0;
 
     $this->originalConversionRates = $rates;
     $this->conversionRates         = $rates;
@@ -56,16 +63,16 @@ class ConversionResult
   /**
    * Set new base currency.
    *
-   * @param string $baseCurrency The new base currency/
+   * @param string $baseCurrency The new base currency.
    *
    * @return self
    *
-   * @throws InvalidCurrencyException
+   * @throws CurrencyException
    */
   public function setBaseCurrency(string $baseCurrency): ConversionResult
   {
     if (!isset($this->conversionRates[$baseCurrency])) {
-      throw new InvalidCurrencyException("No conversion result for '$baseCurrency'!");
+      throw new CurrencyException("No conversion result for '$baseCurrency'!");
     }
 
     if ($baseCurrency == $this->originalBaseCurrency) {
@@ -79,7 +86,7 @@ class ConversionResult
     }
 
     // Set new base currency.
-    $this->baseCurrency = $baseCurrency;
+    $this->baseCurrency                   = $baseCurrency;
     $this->conversionRates[$baseCurrency] = 1.0;
 
     // Return self
@@ -107,12 +114,12 @@ class ConversionResult
    *
    * @return float
    *
-   * @throws InvalidCurrencyException
+   * @throws CurrencyException
    */
   public function rate(string $currency): float
   {
     if (!isset($this->conversionRates[$currency])) {
-      throw new InvalidCurrencyException("No conversion result for $currency!");
+      throw new CurrencyException("No conversion result for $currency!");
     }
 
     return $this->conversionRates[$currency];
@@ -125,16 +132,16 @@ class ConversionResult
    *
    * @return float
    *
-   * @throws InvalidCurrencyException
+   * @throws CurrencyException
    */
   function convert(float $amount, string $fromCurrency, string $toCurrency): float
   {
     if (!isset($this->conversionRates[$toCurrency])) {
-      throw new InvalidCurrencyException("No conversion result for $toCurrency!");
+      throw new CurrencyException("No conversion result for $toCurrency!");
     }
 
     if (!isset($this->conversionRates[$fromCurrency])) {
-      throw new InvalidCurrencyException("No conversion result for $fromCurrency!");
+      throw new CurrencyException("No conversion result for $fromCurrency!");
     }
 
     return $amount * (float)$this->originalConversionRates[$toCurrency] / (float)$this->originalConversionRates[$fromCurrency];

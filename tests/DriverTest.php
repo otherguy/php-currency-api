@@ -7,7 +7,7 @@ use Otherguy\Currency\Symbol;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Class DriverTest
+ * DriverTest
  */
 class DriverTest extends TestCase
 {
