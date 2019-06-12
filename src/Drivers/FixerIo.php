@@ -10,14 +10,13 @@ use Otherguy\Currency\Results\ConversionResult;
  *
  * @package Otherguy\Currency\Drivers
  */
-class FixerIo extends BaseDriver implements DriverInterface
+class FixerIo extends BaseCurrencyDriver implements CurrencyDriverContract
 {
   protected $protocol = 'http';
   protected $apiURL   = 'data.fixer.io/api';
 
   /** @var string $baseCurrency Fixer.io's Free Plan base currency is 'EUR' */
   protected $baseCurrency = 'EUR';
-
 
   /**
    * @param string|array $forCurrency
@@ -108,18 +107,16 @@ class FixerIo extends BaseDriver implements DriverInterface
    * Performs an HTTP request.
    *
    * @param string $endpoint The API endpoint.
-   * @param array  $params   The URL query parameters.
    * @param string $method   The HTTP method (defaults to 'GET').
    *
-   * @return array|string|bool The response as decoded JSON.
-   *
+   * @return array|bool The response as decoded JSON.
    *
    * @throws CurrencyException
    */
-  public function apiRequest(string $endpoint, array $params = [], string $method = 'GET')
+  public function apiRequest(string $endpoint, string $method = 'GET')
   {
     // Perform actual API request.
-    $response = parent::apiRequest($endpoint, $params, $method);
+    $response = parent::apiRequest($endpoint, $method);
 
     // If the response is not an array, something went wrong.
     if(! is_array($response)) {
@@ -132,17 +129,5 @@ class FixerIo extends BaseDriver implements DriverInterface
     }
 
     return $response;
-  }
-
-  /**
-   * Returns an array of default HTTP params.
-   *
-   * @return array
-   */
-  public function getDefaultParams() : array
-  {
-    return [
-      'access_key' => $this->accessKey,
-    ];
   }
 }

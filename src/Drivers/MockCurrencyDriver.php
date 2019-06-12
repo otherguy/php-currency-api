@@ -8,9 +8,9 @@ use Otherguy\Currency\Results\ConversionResult;
  *
  * @package Otherguy\Currency\Drivers
  */
-class MockDriver extends BaseDriver implements DriverInterface
+class MockCurrencyDriver extends BaseCurrencyDriver implements CurrencyDriverContract
 {
-  protected $apiURL    = 'localhost';
+  protected $apiURL = 'localhost';
 
   /**
    * @param string|array $forCurrency
@@ -45,15 +45,5 @@ class MockDriver extends BaseDriver implements DriverInterface
   function historical($date = null, $forCurrency = []): ConversionResult
   {
     return new ConversionResult($this->getBaseCurrency(), time(), []);
-  }
-
-  /**
-   * Returns an array of default HTTP params.
-   *
-   * @return array
-   */
-  public function getDefaultParams() : array
-  {
-    return [];
   }
 }

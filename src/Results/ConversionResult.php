@@ -2,7 +2,6 @@
 
 use DateTime;
 use Otherguy\Currency\Exceptions\CurrencyException;
-use Otherguy\Currency\Exceptions\InvalidCurrencyException;
 
 /**
  * Class ConversionResult

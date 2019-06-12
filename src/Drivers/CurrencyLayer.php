@@ -10,13 +10,17 @@ use Otherguy\Currency\Results\ConversionResult;
  *
  * @package Otherguy\Currency\Drivers
  */
-class CurrencyLayer extends BaseDriver implements DriverInterface
+class CurrencyLayer extends BaseCurrencyDriver implements CurrencyDriverContract
 {
   protected $protocol = 'http';
   protected $apiURL   = 'apilayer.net/api/';
 
   /** @var string $baseCurrency CurrencyLayer's Free Plan base currency is 'USD' */
   protected $baseCurrency = 'USD';
+
+  protected $httpParams   = [
+    'format' => 1
+  ];
 
 
   /**
@@ -91,6 +95,7 @@ class CurrencyLayer extends BaseDriver implements DriverInterface
    * @return ConversionResult
    *
    * @throws CurrencyException
+   * @throws \GuzzleHttp\Exception\GuzzleException
    */
   public function historical($date = null, $forCurrency = []): ConversionResult
   {
@@ -121,18 +126,16 @@ class CurrencyLayer extends BaseDriver implements DriverInterface
    * Performs an HTTP request.
    *
    * @param string $endpoint The API endpoint.
-   * @param array  $params   The URL query parameters.
    * @param string $method   The HTTP method (defaults to 'GET').
    *
-   * @return array|string|bool The response as decoded JSON.
-   *
+   * @return array|bool The response as decoded JSON.
    *
    * @throws CurrencyException
    */
-  public function apiRequest(string $endpoint, array $params = [], string $method = 'GET')
+  public function apiRequest(string $endpoint, string $method = 'GET')
   {
     // Perform actual API request.
-    $response = parent::apiRequest($endpoint, $params, $method);
+    $response = parent::apiRequest($endpoint, $method);
 
     // If the response is not an array, something went wrong.
     if(! is_array($response)) {
@@ -147,16 +150,4 @@ class CurrencyLayer extends BaseDriver implements DriverInterface
     return $response;
   }
 
-  /**
-   * Returns an array of default HTTP params.
-   *
-   * @return array
-   */
-  public function getDefaultParams() : array
-  {
-    return [
-      'access_key' => $this->accessKey,
-      'format'     => 1,
-    ];
-  }
 }

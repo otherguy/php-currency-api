@@ -1,7 +1,6 @@
 <?php namespace Otherguy\Currency\Drivers;
 
 use DateTime;
-use Otherguy\Currency\Exceptions\CurrencyException;
 use Otherguy\Currency\Results\ConversionResult;
 
 /**
@@ -9,37 +8,44 @@ use Otherguy\Currency\Results\ConversionResult;
  *
  * @package Otherguy\Currency\Drivers
  */
-interface DriverInterface
+interface CurrencyDriverContract
 {
   /**
    * @param string $baseCurrency
    *
    * @return self
    */
-  function source(string $baseCurrency): DriverInterface;
-  function from(string $baseCurrency): DriverInterface; // Alias
+  function source(string $baseCurrency): CurrencyDriverContract;
+  function from(string $baseCurrency): CurrencyDriverContract; // Alias
 
   /**
    * @param string|array $symbols
    *
    * @return self
    */
-  function currencies($symbols = []): DriverInterface;
-  function to($symbols = []): DriverInterface;
+  function currencies($symbols = []): CurrencyDriverContract;
+  function to($symbols = []): CurrencyDriverContract; // Alias
 
   /**
    * @param double|integer|float $amount
    *
    * @return self
    */
-  function amount($amount): DriverInterface;
+  function amount($amount): CurrencyDriverContract;
 
   /**
    * @param int|string|DateTime $date
    *
    * @return self
    */
-  function date($date): DriverInterface;
+  function date($date): CurrencyDriverContract;
+
+  /**
+   * Retrieve the date in a 'YYYY-mm-dd' format.
+   *
+   * @return string
+   */
+  function getDate(): string;
 
   /**
    * @return array
@@ -78,13 +84,27 @@ interface DriverInterface
   function getBaseCurrency(): string;
 
   /**
+   * Set a config parameter.
+   *
+   * @param string $key
+   * @param string $value
+   *
+   * @return self
+   */
+  function config(string $key, string $value): CurrencyDriverContract;
+
+  /**
    * Sets the API key to use.
+   *
+   * Shortcut for config('access_key', $accessKey)
    *
    * @param string $accessKey Your API key.
    *
-   * @return DriverInterface
+   * @return self
+   * @see CurrencyDriverContract::config()
+   *
    */
-  function accessKey(string $accessKey): DriverInterface;
+  function accessKey(string $accessKey): CurrencyDriverContract;
 
   /**
    * Secures all HTTP requests by switching to HTTPS.
@@ -93,7 +113,7 @@ interface DriverInterface
    *
    * @return self
    */
-  function secure(): DriverInterface;
+  function secure(): CurrencyDriverContract;
 
   /**
    * Returns the protocol that is currently being used.
@@ -103,20 +123,12 @@ interface DriverInterface
   function getProtocol(): string;
 
   /**
-   * Returns an array of default HTTP params.
-   *
-   * @return array
-   */
-  function getDefaultParams(): array;
-
-  /**
    * Performs an HTTP request.
    *
    * @param string $endpoint The API endpoint.
-   * @param array  $params   The URL query parameters.
    * @param string $method   The HTTP method (defaults to 'GET').
    *
-   * @return array|string|bool The response as decoded JSON.
+   * @return array|bool The response as decoded JSON.
    */
-  function apiRequest(string $endpoint, array $params = [], string $method = 'GET');
+  function apiRequest(string $endpoint, string $method = 'GET');
 }
