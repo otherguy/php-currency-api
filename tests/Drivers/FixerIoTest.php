@@ -23,7 +23,7 @@ class FixerIoTest extends TestCase
   protected function setUp()
   {
     $this->mockHandler = new MockHandler();
-    $this->fixerIo = DriverFactory::make('fixerio', new Client(['handler' => $this->mockHandler]));
+    $this->fixerIo     = DriverFactory::make('fixerio', new Client(['handler' => $this->mockHandler]));
   }
 
   /** @test */

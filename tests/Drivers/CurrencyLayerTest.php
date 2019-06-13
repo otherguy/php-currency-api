@@ -22,7 +22,7 @@ class CurrencyLayerTest extends TestCase
 
   protected function setUp()
   {
-    $this->mockHandler = new MockHandler();
+    $this->mockHandler   = new MockHandler();
     $this->currencyLayer = DriverFactory::make('currencylayer', new Client(['handler' => $this->mockHandler]));
   }
 

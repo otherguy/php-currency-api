@@ -16,9 +16,9 @@ use Otherguy\Currency\Helpers\DateHelper;
  */
 abstract class BaseCurrencyDriver implements CurrencyDriverContract
 {
-  protected $apiURL    = 'localhost';
-  protected $protocol  = 'http';
-  protected $headers   = [
+  protected $apiURL   = 'localhost';
+  protected $protocol = 'http';
+  protected $headers  = [
     'Accept'       => 'application/json',
     'Content-Type' => 'application/json',
   ];
@@ -28,8 +28,8 @@ abstract class BaseCurrencyDriver implements CurrencyDriverContract
   protected $amount       = 0.00;
   protected $date         = null;
 
-  protected $httpClient   = null;
-  protected $httpParams   = [];
+  protected $httpClient = null;
+  protected $httpParams = [];
 
   /**
    * BaseDriver constructor.
@@ -58,7 +58,7 @@ abstract class BaseCurrencyDriver implements CurrencyDriverContract
    * @param string $baseCurrency
    *
    * @return CurrencyDriverContract
-   *@see CurrencyDriverContract::source()
+   * @see CurrencyDriverContract::source()
    *
    */
   public function from(string $baseCurrency): CurrencyDriverContract
@@ -83,7 +83,7 @@ abstract class BaseCurrencyDriver implements CurrencyDriverContract
    * @param array $symbols
    *
    * @return CurrencyDriverContract
-   *@see CurrencyDriverContract::currencies()
+   * @see CurrencyDriverContract::currencies()
    *
    */
   public function to($symbols = []): CurrencyDriverContract
@@ -111,7 +111,7 @@ abstract class BaseCurrencyDriver implements CurrencyDriverContract
    */
   public function date($date): CurrencyDriverContract
   {
-    if($date === null) {
+    if ($date === null) {
       return $this;
     }
 
@@ -210,14 +210,14 @@ abstract class BaseCurrencyDriver implements CurrencyDriverContract
 
     try {
       $response = $this->httpClient->request($method, $url, ['query' => array_merge($this->httpParams, $params)])->getBody();
-    } catch (GuzzleException $e ) {
+    } catch (GuzzleException $e) {
       throw new ApiException($e->getMessage(), $e->getCode(), $e);
     }
 
     $data = json_decode($response->getContents(), true);
 
     // Check for JSON errors
-    if(json_last_error() !== JSON_ERROR_NONE || ! is_array($data)) {
+    if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
       throw new ApiException(json_last_error_msg(), json_last_error());
     }
 

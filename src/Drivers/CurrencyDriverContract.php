@@ -16,6 +16,7 @@ interface CurrencyDriverContract
    * @return self
    */
   public function source(string $baseCurrency): CurrencyDriverContract;
+
   public function from(string $baseCurrency): CurrencyDriverContract; // Alias
 
   /**
@@ -24,6 +25,7 @@ interface CurrencyDriverContract
    * @return self
    */
   public function currencies($symbols = []): CurrencyDriverContract;
+
   public function to($symbols = []): CurrencyDriverContract; // Alias
 
   /**
