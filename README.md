@@ -16,6 +16,12 @@ I needed a currency conversion API for [my travel website]() but couldn't find a
 [`Rackbeat/php-currency-api`](https://github.com/Rackbeat/php-currency-api) package came closest but unfortunately it
 was just a stub and not implemented.
 
+## Features 🌈
+
+* Support for [multiple different APIs](#supported-apis-) through the use of drivers
+* Consistent return interface, independent of the driver being used
+* [Calculations](#conversion-result) can be made based on the returned data
+
 ## Supported APIs 🌐
 
 | Service                                              | Identifier          |
@@ -31,12 +37,12 @@ _If you want to see more services added, feel free to [open an issue](https://gi
 ## Prerequisites 📚
 
 * `PHP 7.1` or higher (Tested on: PHP `7.1` ✅, `7.2` ✅ and `7.3` ✅)
-* [`composer`](https://getcomposer.org)
-* An account with one or more of the API providers above
+* The [`composer`](https://getcomposer.org) dependency manager for PHP
+* An account with one or more of the [API providers](#supported-apis-) listed above
 
 ## Installation 🚀
 
-Just require the package using `composer` and you're good to go!
+Simply require the package using `composer` and you're good to go!
 
 ```bash
 $ composer require otherguy/php-currency-api
@@ -44,22 +50,71 @@ $ composer require otherguy/php-currency-api
 
 ## Usage 🛠
 
+### Currency Symbol Helper
+
+The [`Otherguy\Currency\Symbol`](src/Symbol.php) class provides constants for each supported currency. This is merely
+a helper and does not need to be used. You can simply pass strings like `'USD', 'EUR', ...` to most methods.
+
+```php
+// 'USD'
+$symbol = Otherguy\Currency\Symbol::USD;
+```
+
+Use the `all()` method to retrieve an array of all currency symbols:
+
+```php
+// [ 'AED', 'AFN', ... 'ZWL' ]
+$symbols = Otherguy\Currency\Symbol::all();
+```
+
+The `names()` method returns an associative array with currency names instead:
+
+```php
+// [ 'AED' => 'United Arab Emirates Dirham', 'AFN' => 'Afghan Afghani', ... ]
+$symbols = Otherguy\Currency\Symbol::names(); 
+```
+
+To get the name of a single currency, use the `name()` method:
+
+```php
+// 'United States Dollar'
+$symbols = Otherguy\Currency\Symbol::name( Otherguy\Currency\Symbol::USD ); 
+```
+
 ### Initialize API Instance
 
 ```php
-$api = Otherguy\Currency\API::make('fixerio'); // driver identifier from supported drivers.
+$currency = Otherguy\Currency\DriverFactory::make('fixerio'); // driver identifier from supported drivers.
 ```
 
-### Set base currency (default = USD)
+To get a list of supported drivers, use the `getDrivers()` method:
 
 ```php
-$api->setBase(Otherguy\Currency\Symbol::USD);
+// [ 'mock', 'fixerio', 'currencylayer', ... ]
+$drivers = Otherguy\Currency\DriverFactory::getDrivers()
 ```
 
-### Set symbols to return (default = all/[])
+### Set Base Currency
+
+You can use either `from()` or `source()` to set the base currency. The methods are identical.
+
+>**Note:** Each driver sets its own default base currency. [FixerIO](https://fixer.io) uses `EUR` as base currency
+> while [CurrencyLayer](https://currencylayer.com) uses `USD`.
+
+Most services only allow you to change the base currency in their paid plans. The driver will throw a 
+`Otherguy\Currency\Exceptions\ApiException` if your current plan does not allow changing the base currency.
 
 ```php
-$api->setSymbols([ Otherguy\Currency\Symbol::DKK, Otherguy\Currency\Symbol::EUR, Otherguy\Currency\Symbol::USD ]);
+$currency->source(Otherguy\Currency\Symbol::USD);
+$currency->from(Otherguy\Currency\Symbol::USD);
+```
+
+### Set Return Currencies
+
+You can use either `to()` or `symbols()` to set the return currencies. The methods are identical.
+
+```php
+$api->to([ Otherguy\Currency\Symbol::BTC, Otherguy\Currency\Symbol::EUR, Otherguy\Currency\Symbol::USD ]);
 ```
 
 *Please note, you are not required to use `Otherguy\Currency\Symbol` to specify symbols. It's simply a convenience helper.*
@@ -83,6 +138,8 @@ $api->convert($fromCurrency = 'DKK', $toCurrency = 'EUR', 10.00); // Convert 10 
 $api->historical($date = '2018-01-01'); // Get currency rate for base on 1st of January 2018
 $api->historical($date = '2018-01-01', 'GBP'); // Get currency rate for GBP on 1st of January 2018
 ```
+
+### Conversion Result
 
 ## Contributing 🚧
 

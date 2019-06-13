@@ -3,6 +3,9 @@
 use Otherguy\Currency\Helpers\DateHelper;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * DateHelperTest
+ */
 class DateHelperTest extends TestCase
 {
 
