@@ -50,7 +50,7 @@ $ composer require otherguy/php-currency-api
 The [`Otherguy\Currency\Symbol`](src/Symbol.php) class provides constants for each supported currency. This is merely
 a helper and does not need to be used. You can simply pass strings like `'USD', 'EUR', ...` to most methods.
 
-> Please note that you are not required to use `Otherguy\Currency\Symbol` to specify symbols. It's simply a convenience helper.
+> ！**Note:** You are not required to use `Otherguy\Currency\Symbol` to specify symbols. It's simply a convenience helper.
 
 ```php
 // 'USD'
@@ -109,7 +109,7 @@ $currency->config('format', '1');
 ### Set Base Currency
 You can use either `from()` or `source()` to set the base currency. The methods are identical.
 
-> **Note:** Each driver sets its own default base currency. [FixerIO](https://fixer.io) uses `EUR` as base currency
+> ！**Note:** Each driver sets its own default base currency. [FixerIO](https://fixer.io) uses `EUR` as base currency
 > while [CurrencyLayer](https://currencylayer.com) uses `USD`.
 
 Most services only allow you to change the base currency in their paid plans. The driver will throw a 
@@ -124,7 +124,7 @@ $currency->from(Otherguy\Currency\Symbol::USD);
 You can use either `to()` or `symbols()` to set the return currencies. The methods are identical. Pass a single currency
 or an array of currency symbols to either of these methods. 
 
-> **Note:** Pass an empty array to return all currency symbols supported by this driver. This is the default if you
+> ！**Note:** Pass an empty array to return all currency symbols supported by this driver. This is the default if you
 > don't call the method at all. 
  
 ```php
@@ -152,7 +152,7 @@ $currency->historical('2018-07-01');
 ### Convert Amount
 Use the `convert()` method to convert amounts between currencies.
 
-> **Note:** Most API providers don't allow access to this method using your free account. You can still use the 
+> ！**Note:** Most API providers don't allow access to this method using your free account. You can still use the 
 > [Latest Rates](#latest-rates) or [Historical Rates](#historical-rates) endpoints and perform calculations or conversions
 > on the [`ConversionResult`](#conversion-result) object.
 
