@@ -59,7 +59,7 @@ class FixerIo extends BaseCurrencyDriver implements CurrencyDriverContract
       $this->currencies((array)$forCurrency);
     }
 
-    if(null === $this->getDate() ) {
+    if (null === $this->getDate()) {
       throw new ApiException('Date needs to be set!');
     }
 
@@ -108,7 +108,7 @@ class FixerIo extends BaseCurrencyDriver implements CurrencyDriverContract
       'amount' => $this->amount,
     ];
 
-    if(null !== $this->getDate()) {
+    if (null !== $this->getDate()) {
       $params['date'] = $this->getDate();
     }
 

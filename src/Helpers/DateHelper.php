@@ -23,7 +23,7 @@ class DateHelper
    */
   public static function parse(string $string, string $format): DateTime
   {
-    return DateTime::createFromFormat($format, $string);
+    return new DateTime::createFromFormat($format, $string);
   }
 
   /**

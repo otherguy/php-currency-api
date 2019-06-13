@@ -42,7 +42,6 @@ class ConversionResult
     $this->conversionRates         = $rates;
   }
 
-
   /**
    * Get base currency.
    *

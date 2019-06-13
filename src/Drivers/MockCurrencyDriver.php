@@ -1,6 +1,7 @@
 <?php namespace Otherguy\Currency\Drivers;
 
 use DateTime;
+use Exception;
 use Otherguy\Currency\Results\ConversionResult;
 
 /**
@@ -16,6 +17,8 @@ class MockCurrencyDriver extends BaseCurrencyDriver implements CurrencyDriverCon
    * @param string|array $forCurrency
    *
    * @return ConversionResult
+   *
+   * @throws Exception
    */
   function get($forCurrency = []): ConversionResult
   {

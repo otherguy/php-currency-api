@@ -15,30 +15,30 @@ interface CurrencyDriverContract
    *
    * @return self
    */
-  function source(string $baseCurrency): CurrencyDriverContract;
-  function from(string $baseCurrency): CurrencyDriverContract; // Alias
+  public function source(string $baseCurrency): CurrencyDriverContract;
+  public function from(string $baseCurrency): CurrencyDriverContract; // Alias
 
   /**
    * @param string|array $symbols
    *
    * @return self
    */
-  function currencies($symbols = []): CurrencyDriverContract;
-  function to($symbols = []): CurrencyDriverContract; // Alias
+  public function currencies($symbols = []): CurrencyDriverContract;
+  public function to($symbols = []): CurrencyDriverContract; // Alias
 
   /**
    * @param double|integer|float $amount
    *
    * @return self
    */
-  function amount($amount): CurrencyDriverContract;
+  public function amount($amount): CurrencyDriverContract;
 
   /**
    * @param int|string|DateTime $date
    *
    * @return self
    */
-  function date($date): CurrencyDriverContract;
+  public function date($date): CurrencyDriverContract;
 
   /**
    * Returns the date in 'YYYY-mm-dd' format or null if not set.
@@ -50,14 +50,14 @@ interface CurrencyDriverContract
   /**
    * @return array
    */
-  function getSymbols(): array;
+  public function getSymbols(): array;
 
   /**
    * @param string|array $forCurrency
    *
    * @return ConversionResult
    */
-  function get($forCurrency = []): ConversionResult;
+  public function get($forCurrency = []): ConversionResult;
 
   /**
    * Converts any amount in a given currency to another currency.
@@ -77,12 +77,12 @@ interface CurrencyDriverContract
    *
    * @return ConversionResult
    */
-  function historical($date = null, $forCurrency = []): ConversionResult;
+  public function historical($date = null, $forCurrency = []): ConversionResult;
 
   /**
    * @return string
    */
-  function getBaseCurrency(): string;
+  public function getBaseCurrency(): string;
 
   /**
    * Set a config parameter.
@@ -92,7 +92,7 @@ interface CurrencyDriverContract
    *
    * @return self
    */
-  function config(string $key, string $value): CurrencyDriverContract;
+  public function config(string $key, string $value): CurrencyDriverContract;
 
   /**
    * Sets the API key to use.
@@ -105,7 +105,7 @@ interface CurrencyDriverContract
    * @see CurrencyDriverContract::config()
    *
    */
-  function accessKey(string $accessKey): CurrencyDriverContract;
+  public function accessKey(string $accessKey): CurrencyDriverContract;
 
   /**
    * Secures all HTTP requests by switching to HTTPS.
@@ -114,14 +114,14 @@ interface CurrencyDriverContract
    *
    * @return self
    */
-  function secure(): CurrencyDriverContract;
+  public function secure(): CurrencyDriverContract;
 
   /**
    * Returns the protocol that is currently being used.
    *
    * @return string
    */
-  function getProtocol(): string;
+  public function getProtocol(): string;
 
   /**
    * Performs an HTTP request.
@@ -132,5 +132,5 @@ interface CurrencyDriverContract
    *
    * @return array|bool The response as decoded JSON.
    */
-  function apiRequest(string $endpoint, array $params = [], string $method = 'GET');
+  public function apiRequest(string $endpoint, array $params = [], string $method = 'GET');
 }
