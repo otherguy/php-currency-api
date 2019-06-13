@@ -9,7 +9,7 @@ class DateHelperTest extends TestCase
   /** @test */
   public function can_parse_a_date()
   {
-    $this->assertEquals('23:15:03', DateHelper::parse('23h 15m 03s', 'H\h i\m s\s',)->format('H:i:s'));
+    $this->assertEquals('23:15:03', DateHelper::parse('23h 15m 03s', 'H\h i\m s\s')->format('H:i:s'));
   }
 
   /** @test */
