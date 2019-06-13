@@ -5,7 +5,8 @@ A PHP 7 API Wrapper for Popular Currency Rate APIs
 [![GitHub issues](https://img.shields.io/github/issues/otherguy/php-currency-api.svg?style=flat-square)](https://github.com/otherguy/php-currency-api/issues)
 [![Travis CI](https://img.shields.io/travis/otherguy/php-currency-api.svg?style=flat-square)](https://travis-ci.com/otherguy/php-currency-api)
 [![Coverage](https://img.shields.io/coveralls/otherguy/php-currency-api.svg?style=flat-square)](https://coveralls.io/github/otherguy/php-currency-api?branch=master)
-[![GitHub](https://img.shields.io/github/license/otherguy/php-currency-api.svg?style=flat-square)](LICENSE.md)
+[![Maintainability](https://img.shields.io/codeclimate/maintainability/otherguy/php-currency-api.svg?style=flat-square)](https://codeclimate.com/github/otherguy/php-currency-api)
+[![License](https://img.shields.io/github/license/otherguy/php-currency-api.svg?style=flat-square)](LICENSE.md)
 
 Dont worry about your favorite currency conversion service suddenly shutting down or switching plans on you. Switch away easily.
 
