@@ -68,6 +68,13 @@ class CurrencyLayerTest extends TestCase
   }
 
   /** @test */
+  public function fails_to_get_historical_rates_if_date_not_set()
+  {
+    $this->expectException(ApiException::class);
+    $this->currencyLayer->from(Symbol::USD)->to(Symbol::EUR)->historical();
+  }
+
+  /** @test */
   public function can_convert_currency_amounts()
   {
     // Response from https://currencylayer.com/documentation

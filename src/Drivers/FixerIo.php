@@ -59,8 +59,12 @@ class FixerIo extends BaseCurrencyDriver implements CurrencyDriverContract
       $this->currencies((array)$forCurrency);
     }
 
+    if(null === $this->getDate() ) {
+      throw new ApiException('Date needs to be set!');
+    }
+
     // Get API response
-    $response = $this->apiRequest($this->date, [
+    $response = $this->apiRequest($this->getDate(), [
       'base'    => $this->getBaseCurrency(),
       'symbols' => join(',', $this->getSymbols()),
     ]);

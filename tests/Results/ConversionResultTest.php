@@ -28,7 +28,6 @@ class ConversionResultTest extends TestCase
   public function construct_will_properly_set_parameters()
   {
     $this->assertEquals(Symbol::USD, $this->classUnderTest->getBaseCurrency());
-    $this->assertEquals(1560293762, $this->classUnderTest->getTimestamp());
     $this->assertEquals('2019-06-11', $this->classUnderTest->getDate());
 
     $result = new ConversionResult(Symbol::USD, '1936-07-21', [

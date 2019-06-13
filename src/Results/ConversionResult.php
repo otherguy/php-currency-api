@@ -1,7 +1,9 @@
 <?php namespace Otherguy\Currency\Results;
 
 use DateTime;
+use Exception;
 use Otherguy\Currency\Exceptions\CurrencyException;
+use Otherguy\Currency\Helpers\DateHelper;
 
 /**
  * Class ConversionResult
@@ -14,7 +16,7 @@ class ConversionResult
   private $originalBaseCurrency    = [];
 
   protected $baseCurrency;
-  protected $timestamp;
+  protected $date;
   protected $conversionRates = [];
 
 
@@ -24,23 +26,15 @@ class ConversionResult
    * @param string              $baseCurrency
    * @param int|DateTime|string $date
    * @param array               $rates
+   *
+   * @throws Exception
    */
   public function __construct(string $baseCurrency, $date, array $rates)
   {
     $this->originalBaseCurrency = $baseCurrency;
     $this->baseCurrency         = $baseCurrency;
 
-    if (is_integer($date)) {
-      $this->timestamp = $date;
-    } else {
-      if ($date instanceof DateTime) {
-        $this->timestamp = $date->getTimestamp();
-      } else {
-        if (is_string($date)) {
-          $this->timestamp = strtotime($date);
-        }
-      }
-    }
+    $this->date = DateHelper::format($date, 'Y-m-d');
 
     $rates[$baseCurrency] = 1.0;
 
@@ -97,15 +91,7 @@ class ConversionResult
    */
   public function getDate()
   {
-    return date('Y-m-d', $this->timestamp);
-  }
-
-  /**
-   * Get timestamp.
-   */
-  public function getTimestamp()
-  {
-    return $this->timestamp;
+    return $this->date;
   }
 
   /**

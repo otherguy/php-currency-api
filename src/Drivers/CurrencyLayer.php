@@ -68,9 +68,13 @@ class CurrencyLayer extends BaseCurrencyDriver implements CurrencyDriverContract
       $this->currencies((array)$forCurrency);
     }
 
+    if(null === $this->getDate() ) {
+      throw new ApiException('Date needs to be set!');
+    }
+
     // Get API response
     $response = $this->apiRequest('historical', [
-      'date'       => $this->date,
+      'date'       => $this->getDate(),
       'source'     => $this->getBaseCurrency(),
       'currencies' => join(',', $this->getSymbols()),
     ]);

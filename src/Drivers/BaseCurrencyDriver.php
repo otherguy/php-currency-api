@@ -1,9 +1,13 @@
 <?php namespace Otherguy\Currency\Drivers;
 
+use DateInterval;
 use DateTime;
+use DateTimeInterface;
+use Exception;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Otherguy\Currency\Exceptions\ApiException;
+use Otherguy\Currency\Helpers\DateHelper;
 
 /**
  * Class BaseDriver
@@ -99,20 +103,19 @@ abstract class BaseCurrencyDriver implements CurrencyDriverContract
   }
 
   /**
-   * @param int|string|DateTime $date
+   * @param int|string|DateTime|DateInterval|DateTimeInterface $date
    *
    * @return self
+   *
+   * @throws Exception
    */
   public function date($date): CurrencyDriverContract
   {
-    if (is_integer($date)) {
-      $this->date = date('Y-m-d', $date);
-    } else if ($date instanceof DateTime) {
-      $this->date = $date->format('Y-m-d');
-    } else if (is_string($date)) {
-      $this->date = date('Y-m-d', strtotime($date));
+    if($date === null) {
+      return $this;
     }
 
+    $this->date = DateHelper::format($date, 'Y-m-d');
     return $this;
   }
 
