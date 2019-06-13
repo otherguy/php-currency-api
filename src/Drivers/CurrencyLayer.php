@@ -20,7 +20,7 @@ class CurrencyLayer extends BaseCurrencyDriver implements CurrencyDriverContract
   protected $baseCurrency = Symbol::USD;
 
   protected $httpParams = [
-    'format' => 1,
+    'format' => 0,
   ];
 
   /**
