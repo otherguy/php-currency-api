@@ -1,6 +1,6 @@
 {
 	"name": "otherguy/php-currency-api",
-	"description": "Wrapper for multiple currency rate APIs",
+	"description": "A PHP 7 API Wrapper for Popular Currency Rate APIs",
 	"keywords": [
 		"currency",
 		"currency rates",
