@@ -75,7 +75,7 @@ To get the name of a single currency, use the `name()` method:
 
 ```php
 // 'United States Dollar'
-$symbols = Otherguy\Currency\Symbol::name( Otherguy\Currency\Symbol::USD ); 
+$symbols = Otherguy\Currency\Symbol::name(Otherguy\Currency\Symbol::USD); 
 ```
 
 ### Initialize API Instance
@@ -162,10 +162,56 @@ $currency->convert(122.50, 'NPR', 'EUR', '2019-01-01'); // Convert 122.50 NPR to
 ```
 
 ### Fluent Interface
-`TODO`
+Most methods can be used with a _fluent interface_, allowing you to chain method calls for more readable code:
+
+```php
+// Namespaces are omitted for readability! 
+DriverFactory::make('driver')->from(Symbol::USD)->to(Symbol::EUR)->get();
+DriverFactory::make('driver')->from(Symbol::USD)->to(Symbol::NPR)->date('2013-03-02')->historical();
+DriverFactory::make('driver')->from(Symbol::USD)->to(Symbol::NPR)->amount(12.10)->convert();
+```
 
 ### Conversion Result
-`TODO`
+The [`get()`](#latest-rates) and [`historical()`](#historical-rates) endpoints return a 
+[`ConversionResult`](src/Results/ConversionResult.php) object. This object allows you to perform calculations and 
+conversions easily.
+
+> ！**Note:** Even though free accounts of most providers do not allow you to change the base currency, you can still
+> use the `ConversionResult` object to change the base currency later. This might not be as accurate as changing the 
+> base currency directly, though. 
+
+> ！**Note:** To convert between two currencies, you need to request both of them in your initial [`get()`](#latest-rates) 
+> or [`historical()`](#historical-rates) request. You can not convert between currencies that have not been fetched!
+
+See the following code for some examples of what you can do with the `ConversionResult` object.
+
+```php
+$result = DriverFactory::make('driver')->from(Symbol::USD)->to([Symbol::EUR, Symbol::GBP])->get();
+
+// [ 'USD' => 1.00, 'EUR' => 0.89, 'GBP' => 0.79 ]
+$result->all();
+
+// 'USD'
+$result->getBaseCurrency();
+
+// '2019-06-11'
+$result->getDate();
+
+// 0.89
+$result->rate(Symbol::EUR);
+
+// CurrencyException("No conversion result for BTC!");
+$result->rate(Symbol::BTC);
+
+// 5.618
+$result->convert(5.0, Symbol::EUR, Symbol::USD);
+
+// [ 'USD' => 1.13, 'EUR' => 1.00, 'GBP' => 0.89 ]
+$result->setBaseCurrency(Symbol::EUR)->all();
+
+// 1.12
+$result->setBaseCurrency(Symbol::GBP)->rate(Symbol::EUR);
+```
 
 ## Contributing 🚧
 [Pull Requests](https://github.com/otherguy/php-currency-api/pulls) are more than welcome! I'm striving for 100% test 

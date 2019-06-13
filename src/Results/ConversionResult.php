@@ -121,11 +121,11 @@ class ConversionResult
   function convert(float $amount, string $fromCurrency, string $toCurrency): float
   {
     if (!isset($this->conversionRates[$toCurrency])) {
-      throw new CurrencyException("No conversion result for $toCurrency!");
+      throw new CurrencyException("No conversion result for '$toCurrency'!");
     }
 
     if (!isset($this->conversionRates[$fromCurrency])) {
-      throw new CurrencyException("No conversion result for $fromCurrency!");
+      throw new CurrencyException("No conversion result for '$fromCurrency'!");
     }
 
     return $amount * (float)$this->originalConversionRates[$toCurrency] / (float)$this->originalConversionRates[$fromCurrency];
