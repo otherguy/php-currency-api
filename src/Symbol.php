@@ -375,7 +375,7 @@ class Symbol
      *
      * @return array
      */
-    public static function currencyNames(): array
+    public static function names(): array
     {
       return static::$currencyNames;
     }

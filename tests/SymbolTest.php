@@ -21,8 +21,8 @@ class SymbolTest extends TestCase
 
   /** @test */
 	public function can_get_a_list_of_all_symbols() {
-    $this->assertCount(167, Symbol::currencyNames());
-    $this->assertEquals('Lithuanian Litas', Symbol::currencyNames()[Symbol::LTL]);
-    $this->assertEquals('Bitcoin', Symbol::currencyNames()[Symbol::BTC]);
+    $this->assertCount(167, Symbol::names());
+    $this->assertEquals('Lithuanian Litas', Symbol::names()[Symbol::LTL]);
+    $this->assertEquals('Bitcoin', Symbol::names()[Symbol::BTC]);
 	}
 }

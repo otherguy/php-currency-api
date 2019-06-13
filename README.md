@@ -1,4 +1,4 @@
-# PHP Currency API
+# 💱 PHP Currency API
 _A PHP 7 API Wrapper for Popular Currency Rate APIs._
 
 [![Version](https://img.shields.io/packagist/v/otherguy/php-currency-api.svg?style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
@@ -10,13 +10,13 @@ _A PHP 7 API Wrapper for Popular Currency Rate APIs._
 
 Dont worry about your favorite currency conversion service suddenly shutting down or switching plans on you. Switch away easily.
 
-## Inspiration
+## Inspiration 💅
 
 I needed a currency conversion API for [my travel website]() but couldn't find a good PHP package. The idea of the
 [`Rackbeat/php-currency-api`](https://github.com/Rackbeat/php-currency-api) package came closest but unfortunately it
 was just a stub and not implemented.
 
-## Supported APIs
+## Supported APIs 🌐
 
 | Service                                              | Identifier          |
 |------------------------------------------------------|---------------------|
@@ -26,13 +26,15 @@ was just a stub and not implemented.
 | [Rates API](http://ratesapi.io)                      | `ratesapi`          |
 | [Exchange Rates API](https://exchangeratesapi.io)    | `exchangeratesapi`  |
 
-## Prerequisites
+_If you want to see more services added, feel free to [open an issue](https://github.com/otherguy/php-currency-api/issues)!_
+
+## Prerequisites 📚
 
 * `PHP 7.1` or higher (Tested on: PHP `7.1` ✅, `7.2` ✅ and `7.3` ✅)
-* [Composer](https://getcomposer.org)
+* [`composer`](https://getcomposer.org)
 * An account with one or more of the API providers above
 
-## Installation
+## Installation 🚀
 
 Just require the package using `composer` and you're good to go!
 
@@ -40,9 +42,9 @@ Just require the package using `composer` and you're good to go!
 $ composer require otherguy/php-currency-api
 ```
 
-## Usage
+## Usage 🛠
 
-### Initialize instance
+### Initialize API Instance
 
 ```php
 $api = Otherguy\Currency\API::make('fixerio'); // driver identifier from supported drivers.
@@ -81,3 +83,8 @@ $api->convert($fromCurrency = 'DKK', $toCurrency = 'EUR', 10.00); // Convert 10 
 $api->historical($date = '2018-01-01'); // Get currency rate for base on 1st of January 2018
 $api->historical($date = '2018-01-01', 'GBP'); // Get currency rate for GBP on 1st of January 2018
 ```
+
+## Contributing 🚧
+
+[Pull Requests](https://github.com/otherguy/php-currency-api/pulls) are more than welcome! I'm striving for 100% test 
+coverage for this repository so please make sure to add tests for your code. 
