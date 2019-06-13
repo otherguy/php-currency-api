@@ -19,10 +19,9 @@ class CurrencyLayer extends BaseCurrencyDriver implements CurrencyDriverContract
   /** @var string $baseCurrency CurrencyLayer's Free Plan base currency is 'USD' */
   protected $baseCurrency = Symbol::USD;
 
-  protected $httpParams   = [
-    'format' => 1
+  protected $httpParams = [
+    'format' => 1,
   ];
-
 
   /**
    * @param string|array $forCurrency
@@ -40,12 +39,45 @@ class CurrencyLayer extends BaseCurrencyDriver implements CurrencyDriverContract
     // Get API response
     $response = $this->apiRequest('live', [
       'source'     => $this->getBaseCurrency(),
-      'currencies' => join(',', $this->getSymbols())
+      'currencies' => join(',', $this->getSymbols()),
     ]);
 
     // Transform rates response
     $rates = [];
-    foreach($response['quotes'] as $currency => $rate) {
+    foreach ($response['quotes'] as $currency => $rate) {
+      $rates[substr($currency, 3, 3)] = $rate;
+    }
+
+    return new ConversionResult($response['source'], $response['timestamp'], $rates);
+  }
+
+  /**
+   * @param int|string|DateTime $date
+   * @param string|array        $forCurrency
+   *
+   * @return ConversionResult
+   *
+   * @throws CurrencyException
+   */
+  public function historical($date = null, $forCurrency = []): ConversionResult
+  {
+    // Set date
+    $this->date($date);
+
+    if (!empty((array)$forCurrency)) {
+      $this->currencies((array)$forCurrency);
+    }
+
+    // Get API response
+    $response = $this->apiRequest('historical', [
+      'date'       => $this->date,
+      'source'     => $this->getBaseCurrency(),
+      'currencies' => join(',', $this->getSymbols()),
+    ]);
+
+    // Transform rates response
+    $rates = [];
+    foreach ($response['quotes'] as $currency => $rate) {
       $rates[substr($currency, 3, 3)] = $rate;
     }
 
@@ -69,63 +101,34 @@ class CurrencyLayer extends BaseCurrencyDriver implements CurrencyDriverContract
     $this->date($date);
 
     // Overwrite/set params
-    if($amount !== null) {
+    if ($amount !== null) {
       $this->amount = $amount;
     }
 
-    if($fromCurrency !== null) {
+    if ($fromCurrency !== null) {
       $this->baseCurrency = $fromCurrency;
     }
 
-    if($toCurrency !== null) {
+    if ($toCurrency !== null) {
       $this->currencies = [$toCurrency];
     }
 
-    // Get API response
-    $response = $this->apiRequest('convert', [
+    $params = [
       'from'   => $this->getBaseCurrency(),
       'to'     => reset($this->currencies),
-      'amount' => $this->amount
-    ]);
+      'amount' => $this->amount,
+    ];
 
-    // Return the rate as a float
-    return floatval($response['info']['rate']);
-  }
-
-  /**
-   * @param int|string|DateTime $date
-   * @param string|array        $forCurrency
-   *
-   * @return ConversionResult
-   *
-   * @throws CurrencyException
-   * @throws \GuzzleHttp\Exception\GuzzleException
-   */
-  public function historical($date = null, $forCurrency = []): ConversionResult
-  {
-    // Set date
-    $this->date($date);
-
-    if (!empty((array)$forCurrency)) {
-      $this->currencies((array)$forCurrency);
+    if (null !== $this->getDate()) {
+      $params['date'] = $this->getDate();
     }
 
     // Get API response
-    $response = $this->apiRequest('historical', [
-      'date'       => $this->date,
-      'source'     => $this->getBaseCurrency(),
-      'currencies' => join(',', $this->getSymbols())
-    ]);
+    $response = $this->apiRequest('convert', $params);
 
-    // Transform rates response
-    $rates = [];
-    foreach($response['quotes'] as $currency => $rate) {
-      $rates[substr($currency, 3, 3)] = $rate;
-    }
-
-    return new ConversionResult($response['source'], $response['timestamp'], $rates);
+    // Return the rate as a float
+    return floatval($response['result']);
   }
-
 
   /**
    * Performs an HTTP request.
@@ -150,5 +153,4 @@ class CurrencyLayer extends BaseCurrencyDriver implements CurrencyDriverContract
 
     return $response;
   }
-
 }

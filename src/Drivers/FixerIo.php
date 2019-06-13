@@ -19,6 +19,7 @@ class FixerIo extends BaseCurrencyDriver implements CurrencyDriverContract
   /** @var string $baseCurrency Fixer.io's Free Plan base currency is 'EUR' */
   protected $baseCurrency = Symbol::EUR;
 
+
   /**
    * @param string|array $forCurrency
    *

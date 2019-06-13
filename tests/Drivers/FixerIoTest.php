@@ -2,7 +2,6 @@
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use Otherguy\Currency\DriverFactory;
 use Otherguy\Currency\Drivers\FixerIo;
@@ -64,7 +63,7 @@ class FixerIoTest extends TestCase
   }
 
   /** @test */
-  public function can_get_conversion_rates()
+  public function can_convert_currency_amounts()
   {
     // Response from https://fixer.io/documentation
     $this->mockHandler->append(new Response(200, [], '{ "success": true, "query": { "from": "GBP", "to": "JPY", "amount": 25 }, "info": { "timestamp": 1519328414, "rate": 148.972231 }, "historical": "true", "date": "2018-02-22",  "result": 3724.305775 }'));
