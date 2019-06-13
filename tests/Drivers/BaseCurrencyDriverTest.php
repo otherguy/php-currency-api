@@ -8,7 +8,6 @@ use Otherguy\Currency\DriverFactory;
 use Otherguy\Currency\Drivers\BaseCurrencyDriver;
 use Otherguy\Currency\Drivers\MockCurrencyDriver;
 use Otherguy\Currency\Exceptions\ApiException;
-use Otherguy\Currency\Results\ConversionResult;
 use Otherguy\Currency\Symbol;
 use PHPUnit\Framework\TestCase;
 
@@ -34,19 +33,6 @@ class BaseCurrencyDriverTest extends TestCase
   }
 
   /** @test */
-  public function can_get_latest_rates()
-  {
-    $this->assertInstanceOf(ConversionResult::class, $this->baseCurrencyDriver->get());
-  }
-
-  /** @test */
-  public function can_get_historical_rates()
-  {
-    $this->assertInstanceOf(ConversionResult::class, $this->baseCurrencyDriver->historical('2015-01-01'));
-  }
-
-
-  /** @test */
   public function init_will_properly_set_parameters()
   {
     $this->baseCurrencyDriver->source(Symbol::ANG)->currencies([Symbol::DKK, Symbol::USD]);
@@ -54,19 +40,11 @@ class BaseCurrencyDriverTest extends TestCase
     $this->assertEquals(Symbol::ANG, $this->baseCurrencyDriver->getBaseCurrency());
   }
 
-
   /** @test */
   public function will_properly_switch_to_https()
   {
-
     $this->assertEquals('http', $this->baseCurrencyDriver->getProtocol());
     $this->assertEquals('https', $this->baseCurrencyDriver->secure()->getProtocol());
-  }
-
-  /** @test */
-  public function can_convert_currencies()
-  {
-    $this->assertEquals(12.34, $this->baseCurrencyDriver->convert(1, Symbol::USD, Symbol::EUR));
   }
 
   /** @test */
@@ -74,7 +52,6 @@ class BaseCurrencyDriverTest extends TestCase
   {
     $this->assertNotEquals(Symbol::BTC, $this->baseCurrencyDriver->getBaseCurrency());
     $this->assertEquals(Symbol::BTC, $this->baseCurrencyDriver->from(Symbol::BTC)->getBaseCurrency());
-
   }
 
   /** @test */
@@ -133,5 +110,4 @@ class BaseCurrencyDriverTest extends TestCase
       $this->assertEquals('Syntax error', $exception->getMessage());
     }
   }
-
 }

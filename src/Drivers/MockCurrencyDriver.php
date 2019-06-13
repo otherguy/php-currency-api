@@ -25,13 +25,14 @@ class MockCurrencyDriver extends BaseCurrencyDriver implements CurrencyDriverCon
   /**
    * Converts any amount in a given currency to another currency.
    *
-   * @param float  $amount       The amount to convert.
-   * @param string $fromCurrency The base currency.
-   * @param string $toCurrency   The target currency.
+   * @param float               $amount       The amount to convert.
+   * @param string              $fromCurrency The base currency.
+   * @param string              $toCurrency   The target currency.
+   * @param int|string|DateTime $date         The date to get the conversion rate for.
    *
    * @return float The conversion result.
    */
-  function convert(float $amount = null, string $fromCurrency = null, string $toCurrency = null): float
+  public function convert(float $amount = null, string $fromCurrency = null, string $toCurrency = null, $date = null): float
   {
     return 12.34;
   }

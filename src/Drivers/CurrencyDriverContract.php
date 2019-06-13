@@ -41,11 +41,11 @@ interface CurrencyDriverContract
   function date($date): CurrencyDriverContract;
 
   /**
-   * Retrieve the date in a 'YYYY-mm-dd' format.
+   * Returns the date in 'YYYY-mm-dd' format or null if not set.
    *
-   * @return string
+   * @return string|null
    */
-  function getDate(): string;
+  public function getDate(): ?string;
 
   /**
    * @return array
@@ -62,13 +62,14 @@ interface CurrencyDriverContract
   /**
    * Converts any amount in a given currency to another currency.
    *
-   * @param float  $amount       The amount to convert.
-   * @param string $fromCurrency The base currency.
-   * @param string $toCurrency   The target currency.
+   * @param float               $amount       The amount to convert.
+   * @param string              $fromCurrency The base currency.
+   * @param string              $toCurrency   The target currency.
+   * @param int|string|DateTime $date         The date to get the conversion rate for.
    *
    * @return float The conversion result.
    */
-  function convert(float $amount = null, string $fromCurrency = null, string $toCurrency = null): float;
+  public function convert(float $amount = null, string $fromCurrency = null, string $toCurrency = null, $date = null): float;
 
   /**
    * @param int|string|DateTime $date
@@ -126,9 +127,10 @@ interface CurrencyDriverContract
    * Performs an HTTP request.
    *
    * @param string $endpoint The API endpoint.
+   * @param array  $params   The query parameters for this request.
    * @param string $method   The HTTP method (defaults to 'GET').
    *
    * @return array|bool The response as decoded JSON.
    */
-  function apiRequest(string $endpoint, string $method = 'GET');
+  function apiRequest(string $endpoint, array $params = [], string $method = 'GET');
 }

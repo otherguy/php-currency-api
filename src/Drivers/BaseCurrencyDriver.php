@@ -117,11 +117,11 @@ abstract class BaseCurrencyDriver implements CurrencyDriverContract
   }
 
   /**
-   * Retrieves the date.
+   * Returns the date in 'YYYY-mm-dd' format or null if not set.
    *
-   * @return string
+   * @return string|null
    */
-  public function getDate(): string
+  public function getDate(): ?string
   {
     return $this->date;
   }
@@ -194,18 +194,19 @@ abstract class BaseCurrencyDriver implements CurrencyDriverContract
    * Performs an HTTP request.
    *
    * @param string $endpoint The API endpoint.
+   * @param array  $params   The query parameters for this request.
    * @param string $method   The HTTP method (defaults to 'GET').
    *
    * @return array|bool The response as decoded JSON.
    *
    * @throws ApiException
    */
-  public function apiRequest(string $endpoint, string $method = 'GET')
+  function apiRequest(string $endpoint, array $params = [], string $method = 'GET')
   {
     $url = sprintf('%s://%s/%s', $this->getProtocol(), $this->apiURL, $endpoint);
 
     try {
-      $response = $this->httpClient->request($method, $url, ['query' => $this->httpParams])->getBody();
+      $response = $this->httpClient->request($method, $url, ['query' => array_merge($this->httpParams, $params)])->getBody();
     } catch (GuzzleException $e ) {
       throw new ApiException($e->getMessage(), $e->getCode(), $e);
     }
@@ -213,7 +214,7 @@ abstract class BaseCurrencyDriver implements CurrencyDriverContract
     $data = json_decode($response->getContents(), true);
 
     // Check for JSON errors
-    if( json_last_error() !== JSON_ERROR_NONE ) {
+    if(json_last_error() !== JSON_ERROR_NONE || ! is_array($data)) {
       throw new ApiException(json_last_error_msg(), json_last_error());
     }
 

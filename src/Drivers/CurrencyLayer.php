@@ -4,6 +4,7 @@ use DateTime;
 use Otherguy\Currency\Exceptions\ApiException;
 use Otherguy\Currency\Exceptions\CurrencyException;
 use Otherguy\Currency\Results\ConversionResult;
+use Otherguy\Currency\Symbol;
 
 /**
  * Class CurrencyLayer
@@ -16,7 +17,7 @@ class CurrencyLayer extends BaseCurrencyDriver implements CurrencyDriverContract
   protected $apiURL   = 'apilayer.net/api/';
 
   /** @var string $baseCurrency CurrencyLayer's Free Plan base currency is 'USD' */
-  protected $baseCurrency = 'USD';
+  protected $baseCurrency = Symbol::USD;
 
   protected $httpParams   = [
     'format' => 1
@@ -54,16 +55,19 @@ class CurrencyLayer extends BaseCurrencyDriver implements CurrencyDriverContract
   /**
    * Converts any amount in a given currency to another currency.
    *
-   * @param float  $amount       The amount to convert.
-   * @param string $fromCurrency The base currency.
-   * @param string $toCurrency   The target currency.
+   * @param float               $amount       The amount to convert.
+   * @param string              $fromCurrency The base currency.
+   * @param string              $toCurrency   The target currency.
+   * @param int|string|DateTime $date         The date to get the conversion rate for.
    *
    * @return float The conversion result.
    *
-   * @throws CurrencyException
+   * @throws ApiException
    */
-  public function convert(float $amount = null, string $fromCurrency = null, string $toCurrency = null): float
+  public function convert(float $amount = null, string $fromCurrency = null, string $toCurrency = null, $date = null): float
   {
+    $this->date($date);
+
     // Overwrite/set params
     if($amount !== null) {
       $this->amount = $amount;
@@ -122,25 +126,22 @@ class CurrencyLayer extends BaseCurrencyDriver implements CurrencyDriverContract
     return new ConversionResult($response['source'], $response['timestamp'], $rates);
   }
 
+
   /**
    * Performs an HTTP request.
    *
    * @param string $endpoint The API endpoint.
+   * @param array  $params   The query parameters for this request.
    * @param string $method   The HTTP method (defaults to 'GET').
    *
    * @return array|bool The response as decoded JSON.
    *
-   * @throws CurrencyException
+   * @throws ApiException
    */
-  public function apiRequest(string $endpoint, string $method = 'GET')
+  function apiRequest(string $endpoint, array $params = [], string $method = 'GET')
   {
     // Perform actual API request.
-    $response = parent::apiRequest($endpoint, $method);
-
-    // If the response is not an array, something went wrong.
-    if(! is_array($response)) {
-      throw new ApiException('Unexpected API response!');
-    }
+    $response = parent::apiRequest($endpoint, $params, $method);
 
     // Handle response exceptions.
     if ($response['success'] == false) {
