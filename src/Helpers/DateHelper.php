@@ -12,7 +12,6 @@ use Exception;
  */
 class DateHelper
 {
-
   /**
    * Parse a date from string with a format to a DateTime object
    *
@@ -20,10 +19,12 @@ class DateHelper
    * @param string $format
    *
    * @return DateTime
+   *
+   * @throws Exception
    */
   public static function parse(string $string, string $format): DateTime
   {
-    return new DateTime::createFromFormat($format, $string);
+    return DateTime::createFromFormat($format, $string);
   }
 
   /**
@@ -53,7 +54,6 @@ class DateHelper
       return date($format, $timestamp);
     }
   }
-
 
   /**
    * Get a date object by given date or time format
