@@ -1,5 +1,5 @@
 # PHP Currency API
-A PHP 7 API Wrapper for Popular Currency Rate APIs
+_A PHP 7 API Wrapper for Popular Currency Rate APIs._
 
 [![Version](https://img.shields.io/packagist/v/otherguy/php-currency-api.svg?style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
 [![GitHub issues](https://img.shields.io/github/issues/otherguy/php-currency-api.svg?style=flat-square)](https://github.com/otherguy/php-currency-api/issues)
