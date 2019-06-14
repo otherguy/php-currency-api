@@ -28,7 +28,6 @@ was just a stub and not implemented.
 | [FixerIO](https://fixer.io)                          | `fixerio`           |
 | [CurrencyLayer](https://currencylayer.com)           | `currencylayer`     |
 | [Open Exchange Rates](https://openexchangerates.org) | `openexchangerates` |
-| [Rates API](http://ratesapi.io)                      | `ratesapi`          |
 | [Exchange Rates API](https://exchangeratesapi.io)    | `exchangeratesapi`  |
 
 _If you want to see more services added, feel free to [open an issue](https://github.com/otherguy/php-currency-api/issues)!_
@@ -48,10 +47,10 @@ $ composer require otherguy/php-currency-api
 ## Usage 🛠
 
 ### Currency Symbol Helper
-The [`Otherguy\Currency\Symbol`](src/Symbol.php) class provides constants for each supported currency. This is merely
-a helper and does not need to be used. You can simply pass strings like `'USD', 'EUR', ...` to most methods.
+The [`Otherguy\Currency\Symbol`](src/Symbol.php) class provides constants for each supported currency.
 
-> ！**Note:** You are not required to use `Otherguy\Currency\Symbol` to specify symbols. It's simply a convenience helper.
+> ！**Note:** You are not required to use `Otherguy\Currency\Symbol` to specify symbols. It's simply a convenience helper
+> and does not need to be used. You can simply pass strings like `'USD', 'EUR', ...` to all methods.
 
 ```php
 // 'USD'
