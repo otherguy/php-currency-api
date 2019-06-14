@@ -75,7 +75,7 @@ class FixerIoTest extends TestCase
     // Response from https://fixer.io/documentation
     $this->mockHandler->append(new Response(200, [], '{ "success": true, "query": { "from": "GBP", "to": "JPY", "amount": 25 }, "info": { "timestamp": 1519328414, "rate": 148.972231 }, "historical": "true", "date": "2018-02-22",  "result": 3724.305775 }'));
 
-    $result = $this->fixerIo->from(Symbol::USD)->date('2018-02-22')->convert(25, Symbol::GBP, Symbol::JPY);
+    $result = $this->fixerIo->convert(25, Symbol::GBP, Symbol::JPY, '2018-02-22');
     $this->assertEquals(3724.305775, $result);
   }
 

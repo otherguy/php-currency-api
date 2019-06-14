@@ -6,6 +6,7 @@ use Otherguy\Currency\Drivers\CurrencyLayer;
 use Otherguy\Currency\Drivers\CurrencyDriverContract;
 use Otherguy\Currency\Drivers\FixerIo;
 use Otherguy\Currency\Drivers\MockCurrencyDriver;
+use Otherguy\Currency\Drivers\OpenExchangeRates;
 use Otherguy\Currency\Exceptions\DriverNotFoundException;
 
 /**

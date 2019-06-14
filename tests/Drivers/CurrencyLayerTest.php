@@ -80,7 +80,7 @@ class CurrencyLayerTest extends TestCase
     // Response from https://currencylayer.com/documentation
     $this->mockHandler->append(new Response(200, [], '{"success":true,"terms":"https://currencylayer.com/terms","privacy":"https://currencylayer.com/privacy","query":{"from":"USD","to":"GBP","amount":10},"info":{"timestamp":1430068515,"quote":0.658443},"result":6.58443}'));
 
-    $result = $this->currencyLayer->from(Symbol::USD)->date(1430068515)->convert(10, Symbol::USD, Symbol::GBP);
+    $result = $this->currencyLayer->convert(10, Symbol::USD, Symbol::GBP, 1430068515);
     $this->assertEquals(6.58443, $result);
   }
 
