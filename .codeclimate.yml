@@ -1,0 +1,19 @@
+plugins:
+  git-legal:
+    enabled: true
+  fixme:
+    enabled: true
+  editorconfig:
+    enabled: true
+    channel: beta
+    config:
+      editorconfig: .editorconfig
+  markdownlint:
+    enabled: true
+  sonar-php:
+    enabled: true
+    config:
+      tests_patterns:
+        - src/test/**
+        - app/src/test/**
+      minimum_severity: major
