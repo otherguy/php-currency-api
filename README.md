@@ -233,4 +233,4 @@ $result->setBaseCurrency(Symbol::GBP)->rate(Symbol::EUR);
 ## Contributing 🚧
 
 [Pull Requests](https://github.com/otherguy/php-currency-api/pulls) are more than welcome! I'm striving for 100% test
-coverage for this repository so please make sure to add tests for your code. 
+coverage for this repository so please make sure to add tests for your code.
