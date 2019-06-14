@@ -1,12 +1,9 @@
+version: "2"
 plugins:
   git-legal:
     enabled: true
   fixme:
     enabled: true
-  editorconfig:
-    enabled: true
-    config:
-      editorconfig: .editorconfig
   markdownlint:
     enabled: true
   sonar-php:
