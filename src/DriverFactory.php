@@ -7,6 +7,7 @@ use Otherguy\Currency\Drivers\CurrencyDriverContract;
 use Otherguy\Currency\Drivers\FixerIo;
 use Otherguy\Currency\Drivers\MockCurrencyDriver;
 use Otherguy\Currency\Drivers\OpenExchangeRates;
+use Otherguy\Currency\Drivers\ExchangeRatesApi;
 use Otherguy\Currency\Exceptions\DriverNotFoundException;
 
 /**
@@ -21,7 +22,6 @@ class DriverFactory
     'fixerio'           => FixerIo::class,
     'currencylayer'     => CurrencyLayer::class,
     'openexchangerates' => OpenExchangeRates::class,
-    'ratesapi'          => RatesApi::class,
     'exchangeratesapi'  => ExchangeRatesApi::class,
   ];
 
