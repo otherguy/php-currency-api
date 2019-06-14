@@ -5,13 +5,24 @@ php:
   - "7.2"
   - "7.3"
 
+env:
+  global:
+    # This is a write-only ID that can only post test reports.
+    - CC_TEST_REPORTER_ID=7d37e7331b1457f8c3a1857f8bd93a33c720f54dfd8bae66fa2a0fed468a3118
+    - GIT_COMMITTED_AT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then git log -1 --pretty=format:%ct; else git log -1 --skip 1 --pretty=format:%ct; fi)
+
 install:
   - curl -s http://getcomposer.org/installer | php
   - php composer.phar install --dev --no-interaction
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 
 script:
   - mkdir -p build
   - vendor/bin/phpunit
+  - "phpunit --testsuite=unit --coverage-text --coverage-clover build/logs/clover.xml"
 
 after_success:
   - travis_retry php vendor/bin/php-coveralls --coverage_clover build/cov.xml --json_path build/coverage.json
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build  -t clover --exit-code $TRAVIS_TEST_RESULT; fi
