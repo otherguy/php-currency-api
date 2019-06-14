@@ -24,4 +24,5 @@ script:
 
 after_success:
   - travis_retry php vendor/bin/php-coveralls --coverage_clover build/cov.xml --json_path build/coverage.json
-  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --input-type clover --exit-code $TRAVIS_TEST_RESULT build/cov.xml; fi
+  - cp build/cov.xml clover.xml
+  - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --coverage-input-type clover --exit-code $TRAVIS_TEST_RESULT; fi
