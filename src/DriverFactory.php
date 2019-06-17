@@ -53,6 +53,6 @@ class DriverFactory
    */
   public static function getDrivers()
   {
-    return array_keys(self::DRIVERS);
+    return self::DRIVERS;
   }
 }
