@@ -137,11 +137,14 @@ class FixerIo extends BaseCurrencyDriver implements CurrencyDriverContract
 
     // Handle response exceptions.
     if ($response['success'] == false) {
-      $message = "[{$response['error']['type']}]";
+      $message = '';
+      if (isset($response['error']['type'])) {
+        $message = "[{$response['error']['type']}]";
+      }
       if (isset($response['error']['info'])) {
         $message .= ' ' . $response['error']['info'];
       }
-      throw new ApiException($message, $response['error']['code']);
+      throw new ApiException(trim($message), $response['error']['code']);
     }
 
     return $response;
