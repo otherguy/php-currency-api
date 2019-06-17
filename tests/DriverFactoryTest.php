@@ -26,7 +26,8 @@ class DriverFactoryTest extends TestCase
   /** @test */
   public function can_get_list_of_drivers()
   {
+
     $this->assertIsArray(DriverFactory::getDrivers());
-    $this->assertContains('mock', DriverFactory::getDrivers());
+    $this->assertArrayHasKey('mock', DriverFactory::getDrivers());
   }
 }
