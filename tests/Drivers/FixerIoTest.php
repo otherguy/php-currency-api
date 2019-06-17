@@ -83,7 +83,7 @@ class FixerIoTest extends TestCase
   public function can_handle_response_failures()
   {
     // Response from https://fixer.io/documentation
-    $this->mockHandler->append(new Response(200, [], '{ "success": false, "error": { "code": 104, "info": "Your monthly API request volume has been reached. Please upgrade your plan." } }'));
+    $this->mockHandler->append(new Response(200, [], '{ "success": false, "error": { "code": 104, "type": "api_volume_reached", "info": "Your monthly API request volume has been reached. Please upgrade your plan." } }'));
 
     $this->expectException(ApiException::class);
     $this->fixerIo->from(Symbol::USD)->to(Symbol::LTL)->get();
