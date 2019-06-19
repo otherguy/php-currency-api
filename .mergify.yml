@@ -3,7 +3,7 @@ pull_request_rules:
   # Automatically merge Dependabot Pull Requests
   - name: Automatic merge for Dependabot
     conditions:
-      - author=dependabot-prview[bot]
+      - author=dependabot-preview[bot]
       - status-success=Travis CI - Pull Request
       - base=master
     actions:
