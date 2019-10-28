@@ -38,7 +38,7 @@ _If you want to see more services added, feel free to [open an issue](https://gi
 
 ## Prerequisites 📚
 
-* `PHP 7.1` or higher (Tested on: PHP `7.1` ✅, `7.2` ✅ and `7.3` ✅)
+* `PHP 7.1` or higher (Tested on: PHP `7.1` ✅, `7.2` ✅, `7.3` ✅ and `7.4` ✅)
 * The [`composer`](https://getcomposer.org) dependency manager for PHP
 * An account with one or more of the [API providers](#supported-apis-) listed above
 
