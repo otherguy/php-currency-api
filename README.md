@@ -1,7 +1,5 @@
 # 💱 PHP API Wrapper for popular Currency Exchange Rate APIs
 
-Dont worry about your favorite currency conversion service suddenly shutting down or switching plans on you. Switch away easily, without changing your code.
-
 [![Version](https://img.shields.io/packagist/v/otherguy/php-currency-api.svg?style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
 [![Installs](https://img.shields.io/packagist/dt/otherguy/php-currency-api?color=blue&label=installs&style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
 [![PHP version](https://img.shields.io/packagist/php-v/otherguy/php-currency-api?style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
@@ -11,6 +9,8 @@ Dont worry about your favorite currency conversion service suddenly shutting dow
 [![Coverage](https://img.shields.io/codeclimate/coverage-letter/otherguy/php-currency-api.svg?style=flat-square)](https://codeclimate.com/github/otherguy/php-currency-api)
 [![Maintainability](https://img.shields.io/codeclimate/maintainability/otherguy/php-currency-api.svg?style=flat-square)](https://codeclimate.com/github/otherguy/php-currency-api)
 [![License](https://img.shields.io/github/license/otherguy/php-currency-api.svg?style=flat-square&color=orange)](LICENSE.md)
+
+Dont worry about your favorite currency conversion service suddenly shutting down or switching plans on you. Switch away easily, without changing your code.
 
 ## Inspiration 💅
 
