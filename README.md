@@ -3,6 +3,7 @@
 _A PHP 7 API Wrapper for Popular Currency Rate APIs._
 
 [![Version](https://img.shields.io/packagist/v/otherguy/php-currency-api.svg?style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
+[![Installs](https://img.shields.io/packagist/dt/otherguy/php-currency-api?color=blue&label=installs&style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
 [![PHP version](https://img.shields.io/packagist/php-v/otherguy/php-currency-api?style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
 [![GitHub issues](https://img.shields.io/github/issues/otherguy/php-currency-api.svg?style=flat-square)](https://github.com/otherguy/php-currency-api/issues)
 [![Travis CI](https://img.shields.io/travis/com/otherguy/php-currency-api.svg?style=flat-square)](https://travis-ci.com/otherguy/php-currency-api)
