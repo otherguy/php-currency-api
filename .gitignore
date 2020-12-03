@@ -14,3 +14,4 @@ composer.phar
 
 ### PHPUnit
 build
+.phpunit.result.cache

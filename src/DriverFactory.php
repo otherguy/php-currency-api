@@ -51,7 +51,7 @@ class DriverFactory
    *
    * @return array
    */
-  public static function getDrivers()
+  public static function getDrivers(): array
   {
     return self::DRIVERS;
   }
