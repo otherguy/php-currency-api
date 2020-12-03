@@ -16,7 +16,7 @@ class ConversionResultTest extends TestCase
   /**
    *
    */
-  protected function setUp()
+  protected function setUp(): void
   {
     $this->classUnderTest = new ConversionResult(Symbol::USD, 1560293762, [
       'EUR' => 0.88,

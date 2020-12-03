@@ -1,8 +1,6 @@
 language: php
 
 php:
-  - "7.1"
-  - "7.2"
   - "7.3"
   - "7.4"
   - "8.0"
@@ -15,7 +13,7 @@ env:
 
 install:
   - curl -s http://getcomposer.org/installer | php
-  - php composer.phar install --dev --no-interaction
+  - php composer.phar install --no-interaction
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build

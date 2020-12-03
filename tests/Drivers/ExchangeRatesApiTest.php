@@ -21,7 +21,7 @@ class ExchangeRatesApiTest extends TestCase
 
   private $mockHandler;
 
-  protected function setUp()
+  protected function setUp(): void
   {
     $this->mockHandler      = new MockHandler();
     $this->exchangeRatesApi = DriverFactory::make('exchangeratesapi', new Client(['handler' => $this->mockHandler]));

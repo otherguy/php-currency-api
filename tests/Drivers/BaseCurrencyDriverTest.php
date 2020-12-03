@@ -21,7 +21,7 @@ class BaseCurrencyDriverTest extends TestCase
 
   private $valid_json_response = '{ "success": true, "base": "USD", "date": "2019-06-11", "rates": { "JPY": 107.346001, "EUR": 0.813399 } }';
 
-  protected function setUp()
+  protected function setUp(): void
   {
     $mock = new MockHandler([
       new Response(200, [], $this->valid_json_response),

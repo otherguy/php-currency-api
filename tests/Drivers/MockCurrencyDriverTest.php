@@ -15,7 +15,7 @@ class MockCurrencyDriverTest extends TestCase
   /** @var BaseCurrencyDriver */
   private $mockCurrencyDriver;
 
-  protected function setUp()
+  protected function setUp(): void
   {
     $this->mockCurrencyDriver = DriverFactory::make('mock');
   }
