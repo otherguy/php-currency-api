@@ -1,6 +1,6 @@
 # 💱 Wrapper for popular Currency Exchange Rate APIs
 
-_A PHP 7 API Wrapper to offer a unified programming interface for popular Currency Rate APIs._
+_A PHP API Wrapper to offer a unified programming interface for popular Currency Rate APIs._
 
 [![Version](https://img.shields.io/packagist/v/otherguy/php-currency-api.svg?style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
 [![Installs](https://img.shields.io/packagist/dt/otherguy/php-currency-api?color=blue&label=installs&style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
@@ -15,7 +15,7 @@ Dont worry about your favorite currency conversion service suddenly shutting dow
 
 ## Inspiration 💅
 
-I needed a currency conversion API for [my travel website]() but could not find a good PHP package. The idea of the
+I needed a currency conversion API for my travel website but could not find a good PHP package. The idea of the
 [`Rackbeat/php-currency-api`](https://github.com/Rackbeat/php-currency-api) package came closest but unfortunately it
 was just a stub and not implemented.
 
@@ -39,7 +39,7 @@ _If you want to see more services added, feel free to [open an issue](https://gi
 
 ## Prerequisites 📚
 
-* `PHP 7.3` or higher (Tested on: PHP ✅, `7.3` ✅ and `7.4` ✅)
+* `PHP 7.3` or higher (Tested on: `7.3` ✅ and `7.4` ✅ and `8.0`)
 * The [`composer`](https://getcomposer.org) dependency manager for PHP
 * An account with one or more of the [API providers](#supported-apis-) listed above
 

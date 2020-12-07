@@ -1,12 +1,31 @@
 {
 	"name": "otherguy/php-currency-api",
-	"description": "A PHP 7 API Wrapper for Popular Currency Rate APIs",
+	"description": "A PHP API Wrapper to offer a unified programming interface for popular Currency Rate APIs.",
 	"keywords": [
 		"currency",
 		"currency rates",
 		"exchange rates",
 		"currency conversion",
 		"api"
+    "currency",
+    "currency-exchange-rates",
+    "composer-package",
+    "php-library",
+    "currency-converter-php",
+    "currency-api",
+    "exchange-rates",
+    "currency-rate-apis",
+    "fluent-interface",
+    "api-wrapper",
+    "currency-converter",
+    "currency-conversion",
+    "currency-exchange",
+    "exchange-rate-api",
+    "exchange-rates-api",
+    "php-package",
+    "php8",
+    "php74",
+    "php73"
 	],
 	"type": "library",
 	"license": "MIT",
@@ -17,7 +36,7 @@
 		}
 	],
 	"require": {
-		"php": ">=7.1.3",
+		"php": ">=7.3",
     "ext-json": "*",
 		"guzzlehttp/guzzle": "^7.2"
 	},
