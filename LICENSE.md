@@ -1,7 +1,7 @@
 The MIT License (MIT)
 =====================
 
-Copyright © `2019` [`@otherguy`](https://github.com/otherguy/)
+Copyright © 2019–2024 [Alexansder Graf](https://github.com/otherguy/)
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
