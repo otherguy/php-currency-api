@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Otherguy\Currency\Drivers;
 
 use Brick\Math\BigDecimal;
-use Brick\Math\RoundingMode;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Otherguy\Currency\Currency;
@@ -24,6 +23,7 @@ class CurrencyLayer extends BaseCurrencyDriver
       'format' => 0,
     ];
 
+    #[Override]
     public function get(string|Currency|array $forCurrency = []): ConversionResult
     {
         if ($forCurrency !== []) {
@@ -42,6 +42,7 @@ class CurrencyLayer extends BaseCurrencyDriver
         );
     }
 
+    #[Override]
     public function historical(
         ?DateTimeInterface $date = null,
         string|Currency|array $forCurrency = [],
@@ -68,62 +69,6 @@ class CurrencyLayer extends BaseCurrencyDriver
             $this->responseString($response, 'source', 'CurrencyLayer'),
             $this->timestampToDate($this->responseInt($response, 'timestamp', 'CurrencyLayer')),
             $this->stripQuotes($this->responseRates($response, 'quotes', 'CurrencyLayer')),
-        );
-    }
-
-    public function convert(
-        ?float $amount = null,
-        string|Currency|null $fromCurrency = null,
-        string|Currency|null $toCurrency = null,
-        ?DateTimeInterface $date = null,
-    ): ConversionResult {
-        if ($date instanceof DateTimeInterface) {
-            $this->date($date);
-        }
-
-        if ($amount !== null) {
-            $this->amount = $amount;
-        }
-
-        if ($fromCurrency !== null) {
-            $this->baseCurrency = Currency::code($fromCurrency);
-        }
-
-        if ($toCurrency !== null) {
-            $this->currencies = [Currency::code($toCurrency)];
-        }
-
-        $target = $this->currencies[0] ?? null;
-        if ($target === null) {
-            throw new ApiException('A target currency is required for convert().');
-        }
-        if ($this->amount === null) {
-            throw new ApiException('An amount is required for convert().');
-        }
-
-        $params = [
-          'from'   => $this->getBaseCurrency(),
-          'to'     => $target,
-          'amount' => $this->amount,
-        ];
-
-        if ($this->getDate() !== null) {
-            $params['date'] = $this->getDate();
-        }
-
-        $response = $this->apiRequest('convert', $params);
-
-        $rate = BigDecimal::of($this->responseString($response, 'result', 'CurrencyLayer'))
-          ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HALF_UP);
-
-        $info = $response['info'] ?? [];
-        $timestamp = is_array($info) ? ($info['timestamp'] ?? null) : null;
-        $timestamp = is_int($timestamp) || is_string($timestamp) ? $timestamp : null;
-
-        return new ConversionResult(
-            $this->getBaseCurrency(),
-            $this->getDate() ?? $this->timestampToDate($timestamp),
-            [$target => $rate],
         );
     }
 

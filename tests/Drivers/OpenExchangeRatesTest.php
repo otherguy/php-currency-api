@@ -83,7 +83,7 @@ class OpenExchangeRatesTest extends TestCase
     #[Test]
     public function can_convert_currency_amounts(): void
     {
-        $this->harness->http->enqueue(new Response(200, [], '{"request":{"query":"/convert/19999.95/GBP/EUR","amount":19999.95,"from":"GBP","to":"EUR"},"meta":{"timestamp":1449885661,"rate":1.383702},"response":27673.975864}'));
+        $this->harness->http->enqueue(new Response(200, [], '{"request":{"query":"/convert/19999.95/GBP/EUR","amount":19999.95,"from":"GBP","to":"EUR"},"meta":{"timestamp":1449885661,"rate":1.383702},"response":27673.975864,"result":27673.975864}'));
 
         $result = $this->driver->convert(19999.95, Currency::GBP, Currency::EUR);
 

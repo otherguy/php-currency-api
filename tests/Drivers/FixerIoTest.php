@@ -47,6 +47,7 @@ class FixerIoTest extends TestCase
     {
         $this->harness->http->enqueue(new Response(200, [], '{"success":true,"historical":true,"date":"2013-12-24","timestamp":1387929599,"base":"GBP","rates":{"USD":1.636492,"EUR":1.196476,"CAD":1.739516}}'));
 
+
         $result = $this->driver->from(Currency::GBP)->historical(
             new DateTimeImmutable('2013-12-24'),
             [Currency::USD, Currency::EUR, Currency::CAD],

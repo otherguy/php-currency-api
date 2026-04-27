@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Otherguy\Currency\Tests\Support;
 
+use Otherguy\Currency\Exceptions\MockHttpClientException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use RuntimeException;
 
 class MockHttpClient implements ClientInterface
 {
@@ -30,7 +30,7 @@ class MockHttpClient implements ClientInterface
         $this->sentRequests[] = $request;
 
         if ($this->queue === []) {
-            throw new RuntimeException('MockHttpClient queue is empty.');
+            throw new MockHttpClientException('MockHttpClient queue is empty.');
         }
 
         $next = array_shift($this->queue);

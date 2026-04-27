@@ -2,6 +2,7 @@ parameters:
   level: max
   paths:
     - src
+    - tests
   treatPhpDocTypesAsCertain: false
   tmpDir: build/phpstan
   ignoreErrors:

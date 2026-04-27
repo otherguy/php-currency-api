@@ -92,6 +92,7 @@ class BaseCurrencyDriverTest extends TestCase
     {
         $this->http->enqueue(new Response(200, [], '{"success":true,"base":"USD","date":"2019-06-11","rates":{"JPY":107.346001,"EUR":0.813399}}'));
 
+        /** @var array{base: string, date: string, rates: array<string, float>} $response */
         $response = $this->driver->callApi('latest');
 
         $this->assertSame('USD', $response['base']);

@@ -4,11 +4,30 @@ Thanks for considering a contribution! This guide covers the local workflow and 
 
 ## Getting started
 
+### Prerequisites
+
+You will need the following tools installed on your system to run the full suite of checks:
+
+- **PHP 8.3+** and **Composer**
+- **[Lefthook](https://github.com/evilmartians/lefthook)**: Git hooks manager.
+- **[markdownlint-cli2](https://github.com/DavidAnson/markdownlint-cli2)**: Markdown linter.
+- **[yamllint](https://github.com/adrienverge/yamllint)**: YAML linter.
+- **[Qlty](https://qlty.sh)**: Code quality toolkit.
+
+On macOS, you can install most of these via Homebrew:
+
+```bash
+brew install lefthook markdownlint-cli2 yamllint
+curl -L https://qlty.sh/get | sh
+```
+
+### Setup
+
 ```bash
 git clone https://github.com/otherguy/php-currency-api.git
 cd php-currency-api
 composer install
-composer check
+lefthook install
 ```
 
 `composer check` runs the same gates as CI (Pint, PHPStan, Rector, PHPUnit). It should be green before you push.
@@ -24,7 +43,10 @@ composer check
 | `composer analyse`       | PHPStan at `level: max`                   |
 | `composer rector`        | Rector dry-run                            |
 | `composer rector:fix`    | Rector apply                              |
-| `composer check`         | All four checks in order                  |
+| `composer check`         | All four PHP checks in order              |
+| `markdownlint-cli2`      | Lint all Markdown files                   |
+| `yamllint .`             | Lint all YAML files                       |
+| `qlty check`             | Run Qlty quality checks                   |
 
 ## Code style
 

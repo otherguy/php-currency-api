@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Otherguy\Currency\Drivers;
 
-use Brick\Math\BigDecimal;
-use Brick\Math\RoundingMode;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Otherguy\Currency\Currency;
@@ -31,6 +29,7 @@ class OpenExchangeRates extends BaseCurrencyDriver
         return $this->config('app_id', $accessKey);
     }
 
+    #[Override]
     public function get(string|Currency|array $forCurrency = []): ConversionResult
     {
         if ($forCurrency !== []) {
@@ -49,6 +48,7 @@ class OpenExchangeRates extends BaseCurrencyDriver
         );
     }
 
+    #[Override]
     public function historical(
         ?DateTimeInterface $date = null,
         string|Currency|array $forCurrency = [],
@@ -74,52 +74,6 @@ class OpenExchangeRates extends BaseCurrencyDriver
             $this->responseString($response, 'base', 'OpenExchangeRates'),
             $this->timestampToDate($this->responseInt($response, 'timestamp', 'OpenExchangeRates')),
             $this->responseRates($response, 'rates', 'OpenExchangeRates'),
-        );
-    }
-
-    public function convert(
-        ?float $amount = null,
-        string|Currency|null $fromCurrency = null,
-        string|Currency|null $toCurrency = null,
-        ?DateTimeInterface $date = null,
-    ): ConversionResult {
-        if ($date instanceof DateTimeInterface) {
-            $this->date($date);
-        }
-
-        if ($amount !== null) {
-            $this->amount = $amount;
-        }
-
-        if ($fromCurrency !== null) {
-            $this->baseCurrency = Currency::code($fromCurrency);
-        }
-
-        if ($toCurrency !== null) {
-            $this->currencies = [Currency::code($toCurrency)];
-        }
-
-        $target = $this->currencies[0] ?? null;
-        if ($target === null) {
-            throw new ApiException('A target currency is required for convert().');
-        }
-        if ($this->amount === null) {
-            throw new ApiException('An amount is required for convert().');
-        }
-
-        $response = $this->apiRequest("convert/{$this->amount}/{$this->getBaseCurrency()}/{$target}");
-
-        $rate = BigDecimal::of($this->responseString($response, 'response', 'OpenExchangeRates'))
-          ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HALF_UP);
-
-        $meta = $response['meta'] ?? [];
-        $timestamp = is_array($meta) ? ($meta['timestamp'] ?? null) : null;
-        $timestamp = is_int($timestamp) || is_string($timestamp) ? $timestamp : null;
-
-        return new ConversionResult(
-            $this->getBaseCurrency(),
-            $this->getDate() ?? $this->timestampToDate($timestamp),
-            [$target => $rate],
         );
     }
 
