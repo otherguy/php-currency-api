@@ -51,11 +51,13 @@ jobs:
         run: vendor/bin/rector --dry-run
 
       - name: Run tests
-        env:
-          XDEBUG_MODE: coverage
         run: |
           mkdir -p build
-          vendor/bin/phpunit
+          if [ "${{ matrix.php }}" = "8.3" ]; then
+            XDEBUG_MODE=coverage vendor/bin/phpunit
+          else
+            vendor/bin/phpunit --no-coverage
+          fi
 
       - name: Upload coverage to Coveralls
         if: matrix.php == '8.3'
