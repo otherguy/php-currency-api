@@ -52,7 +52,7 @@ jobs:
           coverage: ${{ matrix.php == '8.3' && 'pcov' || 'none' }}
           tools: composer:v2
       - name: Cache Composer dependencies
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae
         with:
           path: ~/.composer/cache
           key: composer-${{ matrix.php }}-${{ hashFiles('composer.json') }}
