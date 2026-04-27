@@ -49,7 +49,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           extensions: json, mbstring
-          coverage: ${{ matrix.php == '8.3' && 'xdebug' || 'none' }}
+          coverage: ${{ matrix.php == '8.3' && 'pcov' || 'none' }}
           tools: composer:v2
       - name: Cache Composer dependencies
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830

@@ -27,6 +27,7 @@ class CurrencyApi extends BaseCurrencyDriver
         return $this;
     }
 
+    #[Override]
     public function get(string|Currency|array $forCurrency = []): ConversionResult
     {
         if ($forCurrency !== []) {
@@ -42,6 +43,7 @@ class CurrencyApi extends BaseCurrencyDriver
         );
     }
 
+    #[Override]
     public function historical(
         ?DateTimeInterface $date = null,
         string|Currency|array $forCurrency = [],
@@ -70,6 +72,7 @@ class CurrencyApi extends BaseCurrencyDriver
         );
     }
 
+    #[Override]
     public function convert(
         ?float $amount = null,
         string|Currency|null $fromCurrency = null,

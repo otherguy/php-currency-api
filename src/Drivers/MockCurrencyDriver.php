@@ -9,6 +9,7 @@ use DateTimeInterface;
 use Otherguy\Currency\Currency;
 use Otherguy\Currency\Helpers\DateHelper;
 use Otherguy\Currency\Results\ConversionResult;
+use Override;
 
 class MockCurrencyDriver extends BaseCurrencyDriver
 {
@@ -28,6 +29,7 @@ class MockCurrencyDriver extends BaseCurrencyDriver
         return $this;
     }
 
+    #[Override]
     public function get(string|Currency|array $forCurrency = []): ConversionResult
     {
         if ($forCurrency !== []) {
@@ -41,6 +43,7 @@ class MockCurrencyDriver extends BaseCurrencyDriver
         );
     }
 
+    #[Override]
     public function historical(
         ?DateTimeInterface $date = null,
         string|Currency|array $forCurrency = [],
@@ -60,6 +63,7 @@ class MockCurrencyDriver extends BaseCurrencyDriver
         );
     }
 
+    #[Override]
     public function convert(
         ?float $amount = null,
         string|Currency|null $fromCurrency = null,

@@ -34,19 +34,19 @@ lefthook install
 
 ## Project commands
 
-| Command                  | What it does                              |
-|--------------------------|-------------------------------------------|
-| `composer test`          | PHPUnit                                   |
-| `composer test:coverage` | PHPUnit with coverage (requires Xdebug)   |
-| `composer lint`          | Pint check (read-only)                    |
-| `composer lint:fix`      | Pint apply                                |
-| `composer analyse`       | PHPStan at `level: max`                   |
-| `composer rector`        | Rector dry-run                            |
-| `composer rector:fix`    | Rector apply                              |
-| `composer check`         | All four PHP checks in order              |
-| `markdownlint-cli2`      | Lint all Markdown files                   |
-| `yamllint .`             | Lint all YAML files                       |
-| `qlty check`             | Run Qlty quality checks                   |
+| Command                  | What it does                                    |
+|--------------------------|-------------------------------------------------|
+| `composer test`          | PHPUnit                                         |
+| `composer test:coverage` | PHPUnit with coverage (requires pcov or Xdebug) |
+| `composer lint`          | Pint check (read-only)                          |
+| `composer lint:fix`      | Pint apply                                      |
+| `composer analyse`       | PHPStan at `level: max`                         |
+| `composer rector`        | Rector dry-run                                  |
+| `composer rector:fix`    | Rector apply                                    |
+| `composer check`         | All four PHP checks in order                    |
+| `markdownlint-cli2`      | Lint all Markdown files                         |
+| `yamllint .`             | Lint all YAML files                             |
+| `qlty check`             | Run Qlty quality checks                         |
 
 ## Code style
 
@@ -75,6 +75,26 @@ lefthook install
 
 - Coverage target: **≥ 98% on `src/`**. New code without tests is unlikely to be merged.
 - Tests must exercise real code paths. Don't write tests that only verify mock behavior.
+
+### Coverage driver
+
+`composer test:coverage` (and the `vendor/bin/phpunit` invocation in CI) needs a coverage driver loaded — without one, the suite reports `No tests executed!` because `phpunit.xml` has `failOnWarning="true"`. Two options:
+
+- **pcov** (recommended — faster, coverage-only):
+
+  ```bash
+  brew install shivammathur/extensions/pcov@8.5    # match your PHP version
+  # or, if shivammathur tap is unreachable:
+  pecl install pcov
+  ```
+
+- **Xdebug** (richer features, slower):
+
+  ```bash
+  pecl install xdebug
+  ```
+
+Verify with `php -m | grep -iE 'pcov|xdebug'`. CI installs Xdebug on the PHP 8.3 leg via `shivammathur/setup-php`.
 
 ## Static analysis
 

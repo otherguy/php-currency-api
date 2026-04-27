@@ -83,7 +83,10 @@ mode = "comment"
 
 [[plugin]]
 name = "phpstan"
-mode = "comment"
+mode = "disabled"
+# CI runs phpstan with the project's composer-installed autoloader.
+# Qlty's sandboxed run cannot resolve PSR-18 / PHPUnit attribute classes,
+# producing false positives for every test file and DriverFactory call.
 
 [[plugin]]
 name = "radarlint-php"

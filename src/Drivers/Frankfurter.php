@@ -21,6 +21,7 @@ class Frankfurter extends BaseCurrencyDriver
         throw new ApiException('Frankfurter does not require an API key.');
     }
 
+    #[Override]
     public function get(string|Currency|array $forCurrency = []): ConversionResult
     {
         if ($forCurrency !== []) {
@@ -36,6 +37,7 @@ class Frankfurter extends BaseCurrencyDriver
         );
     }
 
+    #[Override]
     public function historical(
         ?DateTimeInterface $date = null,
         string|Currency|array $forCurrency = [],
@@ -61,6 +63,7 @@ class Frankfurter extends BaseCurrencyDriver
         );
     }
 
+    #[Override]
     public function convert(
         ?float $amount = null,
         string|Currency|null $fromCurrency = null,

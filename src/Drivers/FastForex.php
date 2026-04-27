@@ -25,6 +25,7 @@ class FastForex extends BaseCurrencyDriver
         return $this->config('api_key', $accessKey);
     }
 
+    #[Override]
     public function get(string|Currency|array $forCurrency = []): ConversionResult
     {
         if ($forCurrency !== []) {
@@ -46,6 +47,7 @@ class FastForex extends BaseCurrencyDriver
         );
     }
 
+    #[Override]
     public function historical(
         ?DateTimeInterface $date = null,
         string|Currency|array $forCurrency = [],
@@ -74,6 +76,7 @@ class FastForex extends BaseCurrencyDriver
         );
     }
 
+    #[Override]
     public function convert(
         ?float $amount = null,
         string|Currency|null $fromCurrency = null,
