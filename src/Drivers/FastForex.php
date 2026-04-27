@@ -123,7 +123,7 @@ class FastForex extends BaseCurrencyDriver
         }
 
         $rate = BigDecimal::of((string) $rates[$target])
-          ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HALF_UP);
+          ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HalfUp);
 
         return new ConversionResult(
             $this->optionalResponseString($response, 'base') ?? $this->getBaseCurrency(),

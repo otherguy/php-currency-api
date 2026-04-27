@@ -30,6 +30,7 @@ class ConversionResult
 
     /**
      * @param array<string, BigDecimal|float|int|string> $rates
+     * @param int<0, max>                                $scale
      *
      * @throws MathException If a rate value is not a valid numeric.
      */
@@ -86,7 +87,7 @@ class ConversionResult
 
         $rebased = [];
         foreach ($this->originalConversionRates as $currency => $rate) {
-            $rebased[$currency] = $rate->dividedBy($divisor, $this->scale, RoundingMode::HALF_UP);
+            $rebased[$currency] = $rate->dividedBy($divisor, $this->scale, RoundingMode::HalfUp);
         }
         $rebased[$code] = BigDecimal::one();
 
@@ -139,7 +140,7 @@ class ConversionResult
 
         return $this->toBigDecimal($amount)
           ->multipliedBy($this->originalConversionRates[$to])
-          ->dividedBy($this->originalConversionRates[$from], $this->scale, RoundingMode::HALF_UP);
+          ->dividedBy($this->originalConversionRates[$from], $this->scale, RoundingMode::HalfUp);
     }
 
     /**
@@ -168,6 +169,10 @@ class ConversionResult
      */
     private function toBigDecimal(BigDecimal|float|int|string $value): BigDecimal
     {
+        if (is_float($value)) {
+            return BigDecimal::of((string) $value);
+        }
+
         return $value instanceof BigDecimal ? $value : BigDecimal::of($value);
     }
 }
