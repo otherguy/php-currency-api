@@ -83,10 +83,18 @@ mode = "comment"
 
 [[plugin]]
 name = "phpstan"
-mode = "disabled"
-# CI runs phpstan with the project's composer-installed autoloader.
-# Qlty's sandboxed run cannot resolve PSR-18 / PHPUnit attribute classes,
-# producing false positives for every test file and DriverFactory call.
+mode = "comment"
+
+# prepare_script: install composer deps so phpstan can resolve PSR-18,
+#   PHPUnit attributes, and project classes during sandboxed analysis.
+# autoload_script: use the project's autoloader (with require-dev installed)
+#   instead of qlty's bare phpstan tool autoloader.
+# copy_configs_into_tool_install = false: keep phpstan.neon at the project
+#   root so its relative `path:` rules under ignoreErrors continue to match.
+[plugins.definitions.phpstan.drivers.lint]
+prepare_script = "~/.qlty/cache/tools/composer/generic-42cc848a9f5e/composer.phar install --no-scripts --ignore-platform-reqs --no-interaction --no-progress"
+autoload_script = "--autoload-file=vendor/autoload.php"
+copy_configs_into_tool_install = false
 
 [[plugin]]
 name = "radarlint-php"
