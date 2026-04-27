@@ -1,237 +1,552 @@
-# 💱 Wrapper for popular Currency Exchange Rate APIs
+# 💱 PHP Currency API
 
-_A PHP API Wrapper to offer a unified programming interface for popular Currency Rate APIs._
+![PHP Currency API](resources/open-graph-preview.png)
+
+_A PHP API Wrapper offering a unified, fluent programming interface for popular currency exchange rate APIs._
 
 [![Version](https://img.shields.io/packagist/v/otherguy/php-currency-api.svg?style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
 [![Installs](https://img.shields.io/packagist/dt/otherguy/php-currency-api?color=blue&label=installs&style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
 [![PHP version](https://img.shields.io/packagist/php-v/otherguy/php-currency-api?style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
-[![Travis CI](https://img.shields.io/travis/com/otherguy/php-currency-api.svg?style=flat-square)](https://travis-ci.com/otherguy/php-currency-api)
-[![Coverage](https://img.shields.io/coveralls/otherguy/php-currency-api.svg?style=flat-square)](https://coveralls.io/github/otherguy/php-currency-api?branch=master)
-[![Coverage](https://img.shields.io/codeclimate/coverage-letter/otherguy/php-currency-api.svg?style=flat-square)](https://codeclimate.com/github/otherguy/php-currency-api)
-[![Maintainability](https://img.shields.io/codeclimate/maintainability/otherguy/php-currency-api.svg?style=flat-square)](https://codeclimate.com/github/otherguy/php-currency-api)
+[![CI](https://img.shields.io/github/actions/workflow/status/otherguy/php-currency-api/ci.yml?branch=main&style=flat-square)](https://github.com/otherguy/php-currency-api/actions)
+[![Coverage](https://img.shields.io/coveralls/otherguy/php-currency-api.svg?style=flat-square)](https://coveralls.io/github/otherguy/php-currency-api?branch=main)
 [![License](https://img.shields.io/github/license/otherguy/php-currency-api.svg?style=flat-square&color=orange)](LICENSE.md)
 
-Dont worry about your favorite currency conversion service suddenly shutting down or switching plans on you. Switch away easily, without changing your code.
+Don't worry about your favorite currency conversion service shutting down or changing plans. Switch providers without changing your code.
 
-## Inspiration 💅
+## What's new in 2.0
 
-I needed a currency conversion API for my travel website but could not find a good PHP package. The idea of the
-[`Rackbeat/php-currency-api`](https://github.com/Rackbeat/php-currency-api) package came closest but unfortunately it
-was just a stub and not implemented.
+- **PHP 8.3+** with strict types everywhere.
+- **PSR-18 / PSR-17** HTTP layer — bring your own client (Guzzle, Symfony, anything PSR-compliant).
+- **`brick/math` `BigDecimal`** for precise rate math instead of floats.
+- **`Currency` backed enum** replaces the old `Symbol` constants class (which is kept as a deprecation shim).
+- **New `frankfurter` driver** — free, no API key required.
+- **New `currencyapi` and `fastforex` drivers** — provider parity with TripTally's backend FX stack.
+- **Rewritten `exchangeratesapi` driver** — now points at the working `api.apilayer.com` endpoint with full `convert()` support.
+- **Pluggable `DriverFactory`** — register your own provider at runtime.
 
-## Features 🌈
+You can find detailed instructions on how to upgrade from `1.x` to `2.x` in [UPGRADING.md](UPGRADING.md).
 
-* Support for [multiple different APIs](#supported-apis-) through the use of drivers
-* A [fluent interface](#fluent-interface) to make retrieving exchange rates convenient and fast
-* Consistent return interface that is independent of the driver being used
-* [Calculations](#conversion-result) can be made based on the returned data
+## Features
 
-## Supported APIs 🌐
+- Multiple drivers behind a single interface — switch providers by changing one string.
+- Fluent setter chain (`source`, `to`, `amount`, `date`, …) on every driver.
+- `ConversionResult` value object with lossless rebasing (`setBaseCurrency()`).
+- Hermetic test surface — inject any PSR-18 client, including in-memory mocks.
 
-| Service                                              | Identifier          |
-|------------------------------------------------------|---------------------|
-| [FixerIO](https://fixer.io)                          | `fixerio`           |
-| [CurrencyLayer](https://currencylayer.com)           | `currencylayer`     |
-| [Open Exchange Rates](https://openexchangerates.org) | `openexchangerates` |
-| [Exchange Rates API](https://exchangeratesapi.io)    | `exchangeratesapi`  |
+## Supported APIs
 
-_If you want to see more services added, feel free to [open an issue](https://github.com/otherguy/php-currency-api/issues)!_
+| Service                                                                            | Identifier          |
+|------------------------------------------------------------------------------------|---------------------|
+| [Frankfurter](https://www.frankfurter.dev)                                         | `frankfurter`       |
+| [FixerIO](https://fixer.io)                                                        | `fixerio`           |
+| [CurrencyLayer](https://currencylayer.com)                                         | `currencylayer`     |
+| [Open Exchange Rates](https://openexchangerates.org)                               | `openexchangerates` |
+| [APILayer Exchange Rates](https://apilayer.com/marketplace/exchangerates_data-api) | `exchangeratesapi`  |
+| [CurrencyAPI](https://currencyapi.com)                                             | `currencyapi`       |
+| [fastFOREX](https://fastforex.io)                                                  | `fastforex`         |
 
-## Prerequisites 📚
+A `mock` driver is also bundled for testing without network access.
 
-* `PHP 8.x` or `PHP 7.3+` or higher (tested on both `7.3` and `7.4`)
-* The [`composer`](https://getcomposer.org) dependency manager for PHP
-* An account with one or more of the [API providers](#supported-apis-) listed above
+_Want another provider? [Open an issue](https://github.com/otherguy/php-currency-api/issues) — or register a custom driver at runtime (see below)._
 
-## Installation 🚀
+## Requirements
 
-Simply require the package using `composer` and you're good to go!
+- PHP **8.3** or higher.
+- A PSR-18 HTTP client and PSR-17 request factory of your choice.
+- An API account with the chosen provider, except for `frankfurter`.
+
+## Installation
 
 ```bash
-$ composer require otherguy/php-currency-api
+composer require otherguy/php-currency-api
 ```
 
-## Usage 🛠
+You also need a PSR-18 client and PSR-17 factory. The most common choice is Guzzle:
 
-### Currency Symbol Helper
+```bash
+composer require guzzlehttp/guzzle http-interop/http-factory-guzzle
+```
 
-The [`Otherguy\Currency\Symbol`](src/Symbol.php) class provides constants for each supported currency.
+Alternatively, with Symfony HttpClient:
 
-> ！**Note:** You are not required to use `Otherguy\Currency\Symbol` to specify symbols. It's simply a convenience helper
-> and does not need to be used. You can simply pass strings like `'USD', 'EUR', ...` to all methods.
+```bash
+composer require symfony/http-client nyholm/psr7
+```
+
+## Quickstart
 
 ```php
-// 'USD'
-$symbol = Otherguy\Currency\Symbol::USD;
+use Otherguy\Currency\Currency;
+use Otherguy\Currency\DriverFactory;
+
+$result = DriverFactory::make('frankfurter')
+    ->from(Currency::USD)
+    ->to([Currency::EUR, Currency::GBP])
+    ->get();
+
+echo $result->rate(Currency::EUR);     // BigDecimal '0.92'
+echo $result->convert(100, Currency::USD, Currency::EUR); // BigDecimal '92.00'
 ```
 
-Use the `all()` method to retrieve an array of all currency symbols:
+`DriverFactory::make()` auto-discovers Guzzle if it's installed and wires up a default PSR-18 client. To inject your own:
 
 ```php
-// [ 'AED', 'AFN', ... 'ZWL' ]
-$symbols = Otherguy\Currency\Symbol::all();
+use GuzzleHttp\Client;
+use Http\Factory\Guzzle\RequestFactory;
+use Otherguy\Currency\DriverFactory;
+
+$factory = new DriverFactory();
+$driver  = $factory->build('fixerio', new Client(), new RequestFactory());
+
+$result = $driver->accessKey('YOUR_KEY')
+    ->from(Currency::EUR)
+    ->to(Currency::USD)
+    ->get();
 ```
 
-The `names()` method returns an associative array with currency names instead:
+### Bring your own HTTP client (Symfony + nyholm/psr7)
 
 ```php
-// [ 'AED' => 'United Arab Emirates Dirham', 'AFN' => 'Afghan Afghani', ... ]
-$symbols = Otherguy\Currency\Symbol::names();
+use Nyholm\Psr7\Factory\Psr17Factory;
+use Otherguy\Currency\DriverFactory;
+use Symfony\Component\HttpClient\Psr18Client;
+
+$psr17  = new Psr17Factory();
+$client = new Psr18Client();
+
+$driver = (new DriverFactory())->build('frankfurter', $client, $psr17);
 ```
 
-To get the name of a single currency, use the `name()` method:
+## Usage
+
+### The `Currency` enum
+
+`Otherguy\Currency\Currency` is a backed enum with one case per ISO-4217 code (plus a few common crypto/precious-metal codes).
 
 ```php
-// 'United States Dollar'
-$symbols = Otherguy\Currency\Symbol::name(Otherguy\Currency\Symbol::USD);
+use Otherguy\Currency\Currency;
+
+Currency::USD->value;          // 'USD'
+Currency::USD->displayName();  // 'United States Dollar'
+Currency::tryFromCode('EUR');  // Currency::EUR
+Currency::tryFromCode('XYZ');  // null
+Currency::cases();             // every supported currency
 ```
 
-### Initialize API Instance
+Every method that takes a currency accepts either the enum or its string code, so plain `'USD'` keeps working.
+
+### Setting the access key
+
+Most providers require authentication. `accessKey()` is sugar for `config('access_key', …)` and is wired per-driver to the right query-string parameter.
 
 ```php
-$currency = Otherguy\Currency\DriverFactory::make('fixerio'); // driver identifier from supported drivers.
+$driver->accessKey('YOUR_KEY');
 ```
 
-To get a list of supported drivers, use the `getDrivers()` method:
+Frankfurter has no API key — calling `accessKey()` on it throws `ApiException`. CurrencyAPI is the exception to the query-string rule: its driver sends the key in the `apikey` request header.
+
+Provider-specific key mapping:
+
+| Driver | `accessKey()` mapping |
+| --- | --- |
+| `fixerio` | `access_key` query parameter |
+| `currencylayer` | `access_key` query parameter |
+| `openexchangerates` | `app_id` query parameter |
+| `exchangeratesapi` | `apikey` query parameter |
+| `currencyapi` | `apikey` request header |
+| `fastforex` | `api_key` query parameter |
+| `frankfurter` | no key; throws `ApiException` |
+
+### Configuration options
+
+For provider-specific options use `config()`:
 
 ```php
-// [ 'mock', 'fixerio', 'currencylayer', ... ]
-$drivers = Otherguy\Currency\DriverFactory::getDrivers()
+$driver->config('format', '1'); // CurrencyLayer pretty-printed JSON
 ```
 
-### Set Access Key
+### Base currency
 
-Most API providers require you to sign up and use your issued access key to authenticate against their API. You can
-specify your access key like so:
+`from()` and `source()` are aliases.
 
 ```php
-$currency->accessKey('your-access-token-goes-here');
+$driver->from(Currency::USD);
+$driver->source('USD');
 ```
 
-### Set Configuration Options
+Each driver has its own default base currency: `EUR` for FixerIO, APILayer Exchange Rates, and Frankfurter; `USD` for CurrencyLayer, Open Exchange Rates, CurrencyAPI, fastFOREX, and the mock driver. Most providers only allow base-currency changes on paid plans — they'll respond with an error envelope which the driver translates into `ApiException`.
 
-To set further configuration options, you can use the `config()` method. An example is
-[CurrencyLayer's JSON formatting option](https://currencylayer.com/documentation#format).
+### Target currencies
+
+`to()` and `currencies()` are aliases. Pass a single currency, an array, or variadic arguments. Pass nothing (or an empty array) to ask for every currency the provider supports.
 
 ```php
-$currency->config('format', '1');
+$driver->to(Currency::BTC);
+$driver->currencies([Currency::BTC, Currency::EUR, Currency::USD]);
+$driver->to(Currency::EUR, Currency::GBP);
 ```
 
-### Set Base Currency
-
-You can use either `from()` or `source()` to set the base currency. The methods are identical.
-
-> ！**Note:** Each driver sets its own default base currency. [FixerIO](https://fixer.io) uses `EUR` as base currency
-> while [CurrencyLayer](https://currencylayer.com) uses `USD`.
-
-Most services only allow you to change the base currency in their paid plans. The driver will throw a
-`Otherguy\Currency\Exceptions\ApiException` if your current plan does not allow changing the base currency.
+### Latest rates
 
 ```php
-$currency->source(Otherguy\Currency\Symbol::USD);
-$currency->from(Otherguy\Currency\Symbol::USD);
+$driver->get();              // current rates for the configured target currencies
+$driver->get(Currency::DKK); // override base currency for this call
 ```
 
-### Set Return Currencies
+### Historical rates
 
-You can use either `to()` or `symbols()` to set the return currencies. The methods are identical. Pass a single currency
-or an array of currency symbols to either of these methods.
-
-> ！**Note:** Pass an empty array to return all currency symbols supported by this driver. This is the default if you
-> don't call the method at all.
- 
-```php
-$currency->to(Otherguy\Currency\Symbol::BTC);
-$currency->symbols([Otherguy\Currency\Symbol::BTC, Otherguy\Currency\Symbol::EUR, Otherguy\Currency\Symbol::USD]);
-```
-
-### Latest Rates
-
-This retrieves the most recent exchange rates and returns a [`ConversionResult`](#conversion-result) object.
+Dates must be `DateTimeInterface` (or `null`).
 
 ```php
-$currency->get(); // Get latest rates for selected symbols, using set base currency
-$currency->get('DKK');  // Get latest rates for selected symbols, using DKK as base currency
+use DateTimeImmutable;
+
+$driver->date(new DateTimeImmutable('2010-01-01'))->historical();
+$driver->historical(new DateTimeImmutable('2018-07-01'));
 ```
 
-### Historical Rates
-
-To retrieve historical exchange rates, use the `historical()` method. Note that you need to specify a date either as a
-method parameter or by using the `date()` methods. See [Fluent Interface](#fluent-interface) for more information.
+### Convert amount
 
 ```php
-$currency->date('2010-01-01')->historical();
-$currency->historical('2018-07-01');
+$driver->convert(10.00, Currency::USD, Currency::THB);
+$driver->convert(122.50, Currency::NPR, Currency::EUR, new DateTimeImmutable('2019-01-01'));
 ```
 
-### Convert Amount
+For providers without a native `/convert` endpoint (e.g. Frankfurter), the driver fetches the rate via `get()` / `historical()` and multiplies client-side using `BigDecimal`.
 
-Use the `convert()` method to convert amounts between currencies.
+CurrencyAPI and fastFOREX both expose native latest conversion endpoints. For dated conversions, their drivers fetch historical rates and return a `ConversionResult` for the requested pair.
 
-> ！**Note:** Most API providers don't allow access to this method using your free account. You can still use the 
-> [Latest Rates](#latest-rates) or [Historical Rates](#historical-rates) endpoints and perform calculations or conversions
-> on the [`ConversionResult`](#conversion-result) object.
+### Fluent chain
 
 ```php
-$currency->convert(10.00, 'USD', 'THB'); // Convert 10 USD to THB
-$currency->convert(122.50, 'NPR', 'EUR', '2019-01-01'); // Convert 122.50 NPR to EUR using the rates from January 1st, 2019
+DriverFactory::make('fixerio')->from(Currency::USD)->to(Currency::EUR)->get();
+DriverFactory::make('fixerio')->from(Currency::USD)->to(Currency::NPR)->date(new DateTimeImmutable('2013-03-02'))->historical();
+DriverFactory::make('fixerio')->from(Currency::USD)->to(Currency::NPR)->amount(12.10)->convert();
 ```
 
-### Fluent Interface
+### `ConversionResult`
 
-Most methods can be used with a _fluent interface_, allowing you to chain method calls for more readable code:
+`get()` and `historical()` return a [`ConversionResult`](src/Results/ConversionResult.php). Rates are stored as `BigDecimal` and rebasing is lossless (default scale: 8 decimals).
 
 ```php
-// Namespaces are omitted for readability!
-DriverFactory::make('driver')->from(Symbol::USD)->to(Symbol::EUR)->get();
-DriverFactory::make('driver')->from(Symbol::USD)->to(Symbol::NPR)->date('2013-03-02')->historical();
-DriverFactory::make('driver')->from(Symbol::USD)->to(Symbol::NPR)->amount(12.10)->convert();
+use Brick\Math\BigDecimal;
+
+$result = DriverFactory::make('frankfurter')
+    ->from(Currency::USD)
+    ->to([Currency::EUR, Currency::GBP])
+    ->get();
+
+$result->all();                     // ['USD' => BigDecimal '1', 'EUR' => BigDecimal '0.89', 'GBP' => BigDecimal '0.79']
+$result->allAsFloats();             // legacy float view
+$result->getBaseCurrency();         // 'USD'
+$result->getDate();                 // '2026-04-25'
+$result->rate(Currency::EUR);       // BigDecimal '0.89'
+$result->rateAsFloat(Currency::EUR);// 0.89
+
+$result->convert(5.0, Currency::EUR, Currency::USD); // BigDecimal '5.618...'
+
+$rebased = $result->setBaseCurrency(Currency::EUR);
+$rebased->getBaseCurrency();        // 'EUR'
+$rebased->originalBaseCurrency;     // 'USD' — readonly, never mutated
 ```
 
-### Conversion Result
+`rate()` on a code that wasn't fetched throws `Otherguy\Currency\Exceptions\CurrencyException`. To convert between two arbitrary currencies, request both in the original `get()` / `historical()` call.
 
-The [`get()`](#latest-rates) and [`historical()`](#historical-rates) endpoints return a 
-[`ConversionResult`](src/Results/ConversionResult.php) object. This object allows you to perform calculations and 
-conversions easily.
+## Registering custom drivers
 
-> ！**Note:** Even though free accounts of most providers do not allow you to change the base currency, you can still
-> use the `ConversionResult` object to change the base currency later. This might not be as accurate as changing the
-> base currency directly, though.
-
-> ！**Note:** To convert between two currencies, you need to request both of them in your initial [`get()`](#latest-rates)
-> or [`historical()`](#historical-rates) request. You can not convert between currencies that have not been fetched!
-
-See the following code for some examples of what you can do with the `ConversionResult` object.
+The factory is instance-based. Bring your own driver class (extending `BaseCurrencyDriver`) and register it:
 
 ```php
-$result = DriverFactory::make('driver')->from(Symbol::USD)->to([Symbol::EUR, Symbol::GBP])->get();
+use Otherguy\Currency\DriverFactory;
 
-// [ 'USD' => 1.00, 'EUR' => 0.89, 'GBP' => 0.79 ]
-$result->all();
+$factory = new DriverFactory();
+$factory->register('mybank', \Acme\MyBankDriver::class);
 
-// 'USD'
-$result->getBaseCurrency();
-
-// '2019-06-11'
-$result->getDate();
-
-// 0.89
-$result->rate(Symbol::EUR);
-
-// CurrencyException("No conversion result for BTC!");
-$result->rate(Symbol::BTC);
-
-// 5.618
-$result->convert(5.0, Symbol::EUR, Symbol::USD);
-
-// [ 'USD' => 1.13, 'EUR' => 1.00, 'GBP' => 0.89 ]
-$result->setBaseCurrency(Symbol::EUR)->all();
-
-// 1.12
-$result->setBaseCurrency(Symbol::GBP)->rate(Symbol::EUR);
+$driver = $factory->build('mybank');
 ```
 
-## Contributing 🚧
+The static `DriverFactory::make($name)` continues to work via a process-wide default factory — `DriverFactory::setDefault($factory)` lets you swap it for tests.
 
-[Pull Requests](https://github.com/otherguy/php-currency-api/pulls) are more than welcome! I'm striving for 100% test
-coverage for this repository so please make sure to add tests for your code.
+### Adding a new driver
+
+A driver is the bridge between this library's fluent interface and a specific upstream rate provider. Every driver implements [`CurrencyDriverContract`](src/Drivers/CurrencyDriverContract.php) by extending [`BaseCurrencyDriver`](src/Drivers/BaseCurrencyDriver.php).
+
+The base class supplies:
+
+- All fluent setters (`source`, `from`, `currencies`, `to`, `amount`, `date`, `config`, `accessKey`, `secure`).
+- A PSR-18 / PSR-17 HTTP layer in `apiRequest()` that builds the URI, merges `$httpParams` with per-call params, decodes JSON with `JSON_THROW_ON_ERROR`, and wraps every failure mode in `ApiException`.
+
+You only need to:
+
+1. Set the right defaults for `$apiURL`, `$protocol`, and `$baseCurrency`.
+2. Implement `get()`, `historical()`, and `convert()`.
+3. Override `apiRequest()` only if the provider's successful HTTP response can still carry an error envelope, such as `success: false`.
+
+### Driver skeleton
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Otherguy\Currency\Drivers;
+
+use DateTimeInterface;
+use Otherguy\Currency\Currency;
+use Otherguy\Currency\Exceptions\ApiException;
+use Otherguy\Currency\Results\ConversionResult;
+
+class MyProvider extends BaseCurrencyDriver
+{
+    protected string $apiURL       = 'api.myprovider.example/v1';
+    protected string $protocol     = 'https';
+    protected string $baseCurrency = 'USD';
+
+    public function get(string|Currency|array $forCurrency = []): ConversionResult
+    {
+        if ($forCurrency !== []) {
+            $this->currencies($forCurrency);
+        }
+
+        $response = $this->apiRequest('latest', [
+            'base'    => $this->getBaseCurrency(),
+            'symbols' => implode(',', $this->getSymbols()),
+        ]);
+
+        return new ConversionResult(
+            (string) $response['base'],
+            (string) $response['date'],
+            $response['rates'],
+        );
+    }
+
+    public function historical(
+        ?DateTimeInterface $date = null,
+        string|Currency|array $forCurrency = [],
+    ): ConversionResult {
+        if ($date instanceof DateTimeInterface) {
+            $this->date($date);
+        }
+        if ($forCurrency !== []) {
+            $this->currencies($forCurrency);
+        }
+        if ($this->getDate() === null) {
+            throw new ApiException('Date is required for historical().');
+        }
+
+        $response = $this->apiRequest('history/' . $this->getDate(), [
+            'base' => $this->getBaseCurrency(),
+        ]);
+
+        return new ConversionResult(
+            (string) $response['base'],
+            (string) $response['date'],
+            $response['rates'],
+        );
+    }
+
+    public function convert(
+        ?float $amount = null,
+        string|Currency|null $fromCurrency = null,
+        string|Currency|null $toCurrency = null,
+        ?DateTimeInterface $date = null,
+    ): ConversionResult {
+        if ($amount !== null) {
+            $this->amount = $amount;
+        }
+        if ($fromCurrency !== null) {
+            $this->source($fromCurrency);
+        }
+        if ($toCurrency !== null) {
+            $this->to($toCurrency);
+        }
+        if ($date instanceof DateTimeInterface) {
+            $this->date($date);
+        }
+
+        if ($this->amount === null) {
+            throw new ApiException('An amount is required for convert().');
+        }
+        if ($this->currencies === []) {
+            throw new ApiException('A target currency is required for convert().');
+        }
+
+        $target = $this->getSymbols()[0];
+        $response = $this->apiRequest('convert', [
+            'from'   => $this->getBaseCurrency(),
+            'to'     => $target,
+            'amount' => $this->amount,
+        ]);
+
+        return new ConversionResult(
+            $this->getBaseCurrency(),
+            isset($response['date']) ? (string) $response['date'] : null,
+            [$target => $response['result']],
+        );
+    }
+}
+```
+
+For providers without a native conversion endpoint, fetch a rate through `get()` / `historical()` and multiply client-side with `BigDecimal`; [`Frankfurter`](src/Drivers/Frankfurter.php) is the compact example.
+
+### Driver authentication
+
+`accessKey()` defaults to writing `access_key=...` into `$httpParams`. If your provider uses a different parameter name, override it:
+
+```php
+#[\Override]
+public function accessKey(string $accessKey): static
+{
+    return $this->config('apikey', $accessKey);
+}
+```
+
+For header authentication, write to `$httpHeaders`:
+
+```php
+#[\Override]
+public function accessKey(string $accessKey): static
+{
+    $this->httpHeaders['apikey'] = $accessKey;
+
+    return $this;
+}
+```
+
+If the provider has no keys, throw to make misuse loud:
+
+```php
+#[\Override]
+public function accessKey(string $accessKey): static
+{
+    throw new ApiException('MyProvider does not require an API key.');
+}
+```
+
+### Provider-specific error envelopes
+
+Many providers return HTTP 200 with an error body. Override `apiRequest()` to translate those into `ApiException` before the value reaches `get()` / `historical()` / `convert()`:
+
+```php
+#[\Override]
+protected function apiRequest(string $endpoint, array $params = []): array
+{
+    $response = parent::apiRequest($endpoint, $params);
+
+    if (($response['success'] ?? null) !== true) {
+        $info = (string) ($response['error']['info'] ?? 'Unknown API error.');
+        throw new ApiException($info);
+    }
+
+    return $response;
+}
+```
+
+### First-party driver registration
+
+For first-party drivers shipped with this package, add the class to the built-in map in [`DriverFactory`](src/DriverFactory.php):
+
+```php
+public function __construct(?array $drivers = null)
+{
+    $this->drivers = $drivers ?? [
+        // ...
+        'myprovider' => MyProvider::class,
+    ];
+}
+```
+
+For third-party drivers, use runtime registration as shown above. `register()` returns `$this`, `unregister(string $name)` removes a driver, and `build()` accepts optional PSR-18 + PSR-17 collaborators. If those collaborators are omitted, the factory tries to auto-discover Guzzle.
+
+### Driver tests
+
+Driver tests live under `tests/Drivers/`. Use [`tests/Support/DriverHarness.php`](tests/Support/DriverHarness.php) to wire up an in-process PSR-18 mock:
+
+```php
+use Otherguy\Currency\Currency;
+use Otherguy\Currency\Tests\Support\DriverHarness;
+use Otherguy\Currency\Tests\Support\JsonResponse;
+use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\TestCase;
+
+class MyProviderTest extends TestCase
+{
+    private DriverHarness $harness;
+
+    protected function setUp(): void
+    {
+        $this->harness = new DriverHarness();
+    }
+
+    #[Test]
+    public function get_parses_provider_envelope(): void
+    {
+        $this->harness->http->enqueue(JsonResponse::ok(json_encode([
+            'base'  => 'USD',
+            'date'  => '2026-04-01',
+            'rates' => ['EUR' => 0.92],
+        ], JSON_THROW_ON_ERROR)));
+
+        $result = $this->harness->make('myprovider')
+            ->accessKey('test-key')
+            ->from(Currency::USD)
+            ->to(Currency::EUR)
+            ->get();
+
+        $this->assertSame('0.92', (string) $result->rate(Currency::EUR));
+
+        $request = $this->harness->http->lastRequest();
+        $this->assertNotNull($request);
+        $this->assertStringContainsString('apikey=test-key', $request->getUri()->getQuery());
+    }
+}
+```
+
+`DriverHarness` instantiates a fresh `MockHttpClient` on each test. Use `enqueue()` to queue responses, `lastRequest()` to assert URI/query/headers, and `sentRequests()` for multi-request flows.
+
+### Driver checklist
+
+- [ ] `declare(strict_types=1)` and `Override` attributes where you override.
+- [ ] `$apiURL` does not include the `https://` prefix; `BaseCurrencyDriver` adds the protocol.
+- [ ] `get()`, `historical()`, and `convert()` return `ConversionResult`, not arrays.
+- [ ] Error envelopes are wrapped in `ApiException` so callers see one consistent failure type.
+- [ ] PHPStan is clean at `level: max` (`composer analyse`).
+- [ ] Tests cover happy path, error envelope, and any `accessKey()` quirks.
+- [ ] First-party drivers are registered in `DriverFactory` and listed in the Supported APIs table.
+
+For real examples, browse the existing drivers. They range from thin happy-path code in [`Frankfurter`](src/Drivers/Frankfurter.php), to header authentication in [`CurrencyApi`](src/Drivers/CurrencyApi.php), to envelope translation in [`FixerIo`](src/Drivers/FixerIo.php), [`CurrencyLayer`](src/Drivers/CurrencyLayer.php), and [`ExchangeRatesApi`](src/Drivers/ExchangeRatesApi.php).
+
+## Testing
+
+The library exposes `Otherguy\Currency\Drivers\MockCurrencyDriver` for consumers writing tests without a network. Seed it with rates and use it like any other driver:
+
+```php
+use Otherguy\Currency\Drivers\MockCurrencyDriver;
+
+$driver = (new MockCurrencyDriver(/* PSR-18 + factory */))
+    ->withRates(['EUR' => '0.92', 'GBP' => '0.79']);
+
+$driver->get()->rate('EUR'); // BigDecimal '0.92'
+```
+
+For testing this library itself, see `tests/Support/MockHttpClient.php` — a tiny in-process PSR-18 double that records sent requests and replays queued responses. CONTRIBUTING.md walks through it.
+
+## Project commands
+
+| Command                       | What it does                          |
+|-------------------------------|---------------------------------------|
+| `composer test`               | Run the test suite                    |
+| `composer test:coverage`      | Run with coverage (requires Xdebug)   |
+| `composer lint`               | Pint code-style check (read-only)     |
+| `composer lint:fix`           | Pint auto-fix                         |
+| `composer analyse`            | PHPStan at level max                  |
+| `composer rector`             | Rector dry-run                        |
+| `composer rector:fix`         | Rector apply                          |
+| `composer check`              | All of the above, in order            |
+
+## Contributing
+
+Pull requests are welcome — please run `composer check` before opening one. Coverage target is ≥ 98% on `src/`. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full guide.
+
+## License
+
+[MIT](LICENSE.md).

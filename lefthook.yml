@@ -1,0 +1,24 @@
+---
+# Lefthook configuration
+# For more information: https://github.com/evilmartians/lefthook/blob/master/docs/configuration.md
+
+pre-commit:
+  parallel: true
+  commands:
+    pint:
+      glob: "*.php"
+      run: vendor/bin/pint --test {staged_files}
+    phpstan:
+      run: vendor/bin/phpstan analyse --no-progress
+    rector:
+      run: vendor/bin/rector --dry-run
+    phpunit:
+      run: vendor/bin/phpunit --no-coverage
+    markdownlint:
+      glob: "*.md"
+      run: markdownlint-cli2 {staged_files}
+    yamllint:
+      glob: "*.{yml,yaml}"
+      run: yamllint {staged_files}
+    qlty:
+      run: ~/.qlty/bin/qlty check

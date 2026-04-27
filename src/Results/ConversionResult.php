@@ -1,141 +1,173 @@
-<?php namespace Otherguy\Currency\Results;
+<?php
 
-use DateTime;
-use Exception;
+declare(strict_types=1);
+
+namespace Otherguy\Currency\Results;
+
+use Brick\Math\BigDecimal;
+use Brick\Math\Exception\MathException;
+use Brick\Math\RoundingMode;
+use Otherguy\Currency\Currency;
 use Otherguy\Currency\Exceptions\CurrencyException;
-use Otherguy\Currency\Helpers\DateHelper;
 
-/**
- * Class ConversionResult
- *
- * @package Otherguy\Currency\Results
- */
 class ConversionResult
 {
-  private $originalConversionRates = [];
-  private $originalBaseCurrency    = [];
+    public const int DEFAULT_SCALE = 8;
 
-  protected $baseCurrency;
-  protected $date;
-  protected $conversionRates = [];
+    /**
+     * @var array<string, BigDecimal>
+     */
+    public readonly array $originalConversionRates;
 
+    public readonly string $originalBaseCurrency;
 
-  /**
-   * ConversionResult constructor.
-   *
-   * @param string              $baseCurrency
-   * @param int|DateTime|string $date
-   * @param array               $rates
-   *
-   * @throws Exception
-   */
-  public function __construct(string $baseCurrency, $date, array $rates)
-  {
-    $this->originalBaseCurrency = $baseCurrency;
-    $this->baseCurrency         = $baseCurrency;
+    /**
+     * @var array<string, BigDecimal>
+     */
+    private array $conversionRates;
 
-    $this->date = DateHelper::format($date, 'Y-m-d');
+    private string $baseCurrency;
 
-    $rates[$baseCurrency] = 1.0;
+    /**
+     * @param array<string, BigDecimal|float|int|string> $rates
+     *
+     * @throws MathException If a rate value is not a valid numeric.
+     */
+    public function __construct(
+        string|Currency $baseCurrency,
+        public readonly ?string $date = null,
+        array $rates = [],
+        public readonly int $scale = self::DEFAULT_SCALE,
+    ) {
+        $code = Currency::code($baseCurrency);
 
-    $this->originalConversionRates = $rates;
-    $this->conversionRates         = $rates;
-  }
+        $this->originalBaseCurrency = $code;
+        $this->baseCurrency         = $code;
 
-  /**
-   * Get base currency.
-   *
-   * @return string
-   */
-  public function getBaseCurrency(): string
-  {
-    return $this->baseCurrency;
-  }
+        $normalised = [];
+        foreach ($rates as $currency => $rate) {
+            $normalised[(string) $currency] = $this->toBigDecimal($rate);
+        }
+        $normalised[$code] = BigDecimal::one();
 
-  /**
-   * Set new base currency.
-   *
-   * @param string $baseCurrency The new base currency.
-   *
-   * @return self
-   *
-   * @throws CurrencyException
-   */
-  public function setBaseCurrency(string $baseCurrency): ConversionResult
-  {
-    if (!isset($this->conversionRates[$baseCurrency])) {
-      throw new CurrencyException("No conversion result for '$baseCurrency'!");
+        $this->originalConversionRates = $normalised;
+        $this->conversionRates         = $normalised;
     }
 
-    if ($baseCurrency == $this->originalBaseCurrency) {
-      $this->conversionRates = $this->originalConversionRates;
-      return $this;
+    public function getBaseCurrency(): string
+    {
+        return $this->baseCurrency;
     }
 
-    // Calculate new conversion rates.
-    foreach ($this->originalConversionRates as $currency => $rate) {
-      $this->conversionRates[$currency] = (float)$rate / (float)$this->originalConversionRates[$baseCurrency];
+    public function getDate(): ?string
+    {
+        return $this->date;
     }
 
-    // Set new base currency.
-    $this->baseCurrency                   = $baseCurrency;
-    $this->conversionRates[$baseCurrency] = 1.0;
+    /**
+     * @throws CurrencyException
+     */
+    public function setBaseCurrency(string|Currency $baseCurrency): self
+    {
+        $code = Currency::code($baseCurrency);
 
-    // Return self
-    return $this;
-  }
+        if (!isset($this->originalConversionRates[$code])) {
+            throw new CurrencyException("No conversion result for '{$code}'!");
+        }
 
-  /**
-   * Get date.
-   */
-  public function getDate()
-  {
-    return $this->date;
-  }
+        if ($code === $this->originalBaseCurrency) {
+            $this->conversionRates = $this->originalConversionRates;
+            $this->baseCurrency    = $code;
 
-  /**
-   * @param string $currency
-   *
-   * @return float
-   *
-   * @throws CurrencyException
-   */
-  public function rate(string $currency): float
-  {
-    if (!isset($this->conversionRates[$currency])) {
-      throw new CurrencyException("No conversion result for $currency!");
+            return $this;
+        }
+
+        $divisor = $this->originalConversionRates[$code];
+
+        $rebased = [];
+        foreach ($this->originalConversionRates as $currency => $rate) {
+            $rebased[$currency] = $rate->dividedBy($divisor, $this->scale, RoundingMode::HALF_UP);
+        }
+        $rebased[$code] = BigDecimal::one();
+
+        $this->conversionRates = $rebased;
+        $this->baseCurrency    = $code;
+
+        return $this;
     }
 
-    return $this->conversionRates[$currency];
-  }
+    /**
+     * @throws CurrencyException
+     */
+    public function rate(string|Currency $currency): BigDecimal
+    {
+        $code = Currency::code($currency);
 
-  /**
-   * @param float  $amount
-   * @param string $fromCurrency
-   * @param string $toCurrency
-   *
-   * @return float
-   *
-   * @throws CurrencyException
-   */
-  function convert(float $amount, string $fromCurrency, string $toCurrency): float
-  {
-    if (!isset($this->conversionRates[$toCurrency])) {
-      throw new CurrencyException("No conversion result for '$toCurrency'!");
+        if (!isset($this->conversionRates[$code])) {
+            throw new CurrencyException("No conversion result for {$code}!");
+        }
+
+        return $this->conversionRates[$code];
     }
 
-    if (!isset($this->conversionRates[$fromCurrency])) {
-      throw new CurrencyException("No conversion result for '$fromCurrency'!");
+    /**
+     * @throws CurrencyException
+     */
+    public function rateAsFloat(string|Currency $currency): float
+    {
+        return $this->rate($currency)->toFloat();
     }
 
-    return $amount * (float)$this->originalConversionRates[$toCurrency] / (float)$this->originalConversionRates[$fromCurrency];
-  }
+    /**
+     * @throws CurrencyException
+     */
+    public function convert(
+        BigDecimal|float|int|string $amount,
+        string|Currency $fromCurrency,
+        string|Currency $toCurrency,
+    ): BigDecimal {
+        $from = Currency::code($fromCurrency);
+        $to   = Currency::code($toCurrency);
 
-  /**
-   * @return array
-   */
-  public function all(): array
-  {
-    return $this->conversionRates;
-  }
+        if (!isset($this->originalConversionRates[$to])) {
+            throw new CurrencyException("No conversion result for '{$to}'!");
+        }
+
+        if (!isset($this->originalConversionRates[$from])) {
+            throw new CurrencyException("No conversion result for '{$from}'!");
+        }
+
+        return $this->toBigDecimal($amount)
+          ->multipliedBy($this->originalConversionRates[$to])
+          ->dividedBy($this->originalConversionRates[$from], $this->scale, RoundingMode::HALF_UP);
+    }
+
+    /**
+     * @return array<string, BigDecimal>
+     */
+    public function all(): array
+    {
+        return $this->conversionRates;
+    }
+
+    /**
+     * @return array<string, float>
+     */
+    public function allAsFloats(): array
+    {
+        $floats = [];
+        foreach ($this->conversionRates as $code => $rate) {
+            $floats[$code] = $rate->toFloat();
+        }
+
+        return $floats;
+    }
+
+    /**
+     * @throws MathException
+     */
+    private function toBigDecimal(BigDecimal|float|int|string $value): BigDecimal
+    {
+        return $value instanceof BigDecimal ? $value : BigDecimal::of($value);
+    }
 }

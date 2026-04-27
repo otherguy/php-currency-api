@@ -1,0 +1,85 @@
+---
+name: CI
+'on':
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+      - name: Markdown Lint
+        uses: DavidAnson/markdownlint-cli2-action@v23
+        with:
+          globs: |
+            **/*.md
+          config: ".markdownlint.yaml"
+
+      - name: YAML Lint
+        uses: karancode/yamllint-github-action@master
+        with:
+          yamllint_config_filepath: .yamllint.yml
+          yamllint_comment: true
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  test:
+    name: PHP ${{ matrix.php }} on ${{ matrix.os }}
+    needs: lint
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        php: ['8.3', '8.4']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+      - name: Setup PHP
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: json, mbstring
+          coverage: ${{ matrix.php == '8.3' && 'pcov' || 'none' }}
+          tools: composer:v2
+      - name: Cache Composer dependencies
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ matrix.php }}-${{ hashFiles('composer.json') }}
+          restore-keys: composer-${{ matrix.php }}-
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Lint (Pint)
+        run: vendor/bin/pint --test
+      - name: Static analysis (PHPStan)
+        run: vendor/bin/phpstan analyse --no-progress
+      - name: Rector dry-run
+        run: vendor/bin/rector --dry-run
+      - name: Run tests
+        run: |
+          mkdir -p build
+          if [ "${{ matrix.php }}" = "8.3" ]; then
+            XDEBUG_MODE=coverage vendor/bin/phpunit
+          else
+            vendor/bin/phpunit --no-coverage
+          fi
+      - name: Upload coverage to Coveralls
+        if: matrix.php == '8.3'
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: |-
+          if [ -n "$COVERALLS_REPO_TOKEN" ]; then
+            vendor/bin/php-coveralls --coverage_clover build/cov.xml --json_path build/coverage.json -v
+          else
+            echo "Skipping Coveralls upload — COVERALLS_REPO_TOKEN not set."
+          fi

@@ -1,96 +1,102 @@
 <?php
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Handler\MockHandler;
+declare(strict_types=1);
+
+namespace Otherguy\Currency\Tests\Drivers;
+
+use DateTimeImmutable;
 use GuzzleHttp\Psr7\Response;
-use Otherguy\Currency\DriverFactory;
+use Otherguy\Currency\Currency;
 use Otherguy\Currency\Drivers\CurrencyLayer;
 use Otherguy\Currency\Exceptions\ApiException;
 use Otherguy\Currency\Results\ConversionResult;
-use Otherguy\Currency\Symbol;
+use Otherguy\Currency\Tests\Support\DriverHarness;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-/**
- * CurrencyLayerTest
- */
 class CurrencyLayerTest extends TestCase
 {
-  /** @var CurrencyLayer */
-  private $currencyLayer;
+    private DriverHarness $harness;
+    private CurrencyLayer $driver;
 
-  private $mockHandler;
+    protected function setUp(): void
+    {
+        $this->harness = new DriverHarness();
+        $driver        = $this->harness->make('currencylayer');
+        $this->assertInstanceOf(CurrencyLayer::class, $driver);
+        $this->driver = $driver;
+    }
 
-  protected function setUp(): void
-  {
-    $this->mockHandler   = new MockHandler();
-    $this->currencyLayer = DriverFactory::make('currencylayer', new Client(['handler' => $this->mockHandler]));
-  }
+    #[Test]
+    public function can_get_latest_rates(): void
+    {
+        $this->harness->http->enqueue(new Response(200, [], '{"success":true,"timestamp":1432400348,"source":"USD","quotes":{"USDAUD":1.278342,"USDEUR":1.278342,"USDGBP":0.908019,"USDPLN":3.731504}}'));
 
-  /** @test */
-  public function can_get_latest_rates()
-  {
-    // Response from https://currencylayer.com/documentation
-    $this->mockHandler->append(new Response(200, [], '{"success":true,"terms":"https://currencylayer.com/terms","privacy":"https://currencylayer.com/privacy","timestamp":1432400348,"source":"USD","quotes":{"USDAUD":1.278342,"USDEUR":1.278342,"USDGBP":0.908019,"USDPLN":3.731504}}'));
+        $result = $this->driver->from(Currency::USD)->get([Currency::AUD, Currency::EUR, Currency::GBP, Currency::PLN]);
 
-    $result = $this->currencyLayer->from(Symbol::USD)->get([Symbol::AUD, Symbol::EUR, Symbol::GBP, Symbol::PLN]);
+        $this->assertInstanceOf(ConversionResult::class, $result);
+        $this->assertSame('USD', $result->getBaseCurrency());
+        $this->assertSame('2015-05-23', $result->getDate());
 
-    $this->assertInstanceOf(ConversionResult::class, $result);
+        $this->assertSame('1.278342', (string) $result->rate(Currency::AUD));
+        $this->assertSame('1.278342', (string) $result->rate(Currency::EUR));
+        $this->assertSame('0.908019', (string) $result->rate(Currency::GBP));
+        $this->assertSame('3.731504', (string) $result->rate(Currency::PLN));
+    }
 
-    $this->assertEquals(Symbol::USD, $result->getBaseCurrency());
-    $this->assertEquals('2015-05-23', $result->getDate());
+    #[Test]
+    public function can_get_historical_rates(): void
+    {
+        $this->harness->http->enqueue(new Response(200, [], '{"success":true,"historical":true,"date":"2005-02-01","timestamp":1107302399,"source":"USD","quotes":{"USDAED":3.67266,"USDAUD":1.293878}}'));
 
-    $this->assertEquals(1.278342, $result->rate(Symbol::AUD));
-    $this->assertEquals(1.278342, $result->rate(Symbol::EUR));
-    $this->assertEquals(0.908019, $result->rate(Symbol::GBP));
-    $this->assertEquals(3.731504, $result->rate(Symbol::PLN));
-  }
+        $result = $this->driver->from(Currency::USD)->historical(
+            new DateTimeImmutable('2005-02-01'),
+            [Currency::AED, Currency::AUD],
+        );
 
+        $this->assertSame('USD', $result->getBaseCurrency());
+        $this->assertSame('2005-02-01', $result->getDate());
+        $this->assertSame('3.67266', (string) $result->rate(Currency::AED));
+        $this->assertSame('1.293878', (string) $result->rate(Currency::AUD));
+    }
 
-  /** @test */
-  public function can_get_historical_rates()
-  {
-    // Response from https://currencylayer.com/documentation
-    $this->mockHandler->append(new Response(200, [], '{"success":true,"terms":"https://currencylayer.com/terms","privacy":"https://currencylayer.com/privacy","historical":true,"date":"2005-02-01","timestamp":1107302399,"source":"USD","quotes":{"USDAED":3.67266,"USDALL":96.848753,"USDAMD":475.798297,"USDANG":1.790403,"USDARS":2.918969,"USDAUD":1.293878}}'));
+    #[Test]
+    public function fails_to_get_historical_rates_if_date_not_set(): void
+    {
+        $this->expectException(ApiException::class);
+        $this->driver->from(Currency::USD)->to(Currency::EUR)->historical();
+    }
 
-    $result = $this->currencyLayer->from(Symbol::USD)->historical('2005-02-01', [Symbol::AED, Symbol::ALL, Symbol::AMD, Symbol::ANG, Symbol::ARS, Symbol::AUD]);
+    #[Test]
+    public function can_convert_currency_amounts(): void
+    {
+        $this->harness->http->enqueue(new Response(200, [], '{"success":true,"query":{"from":"USD","to":"GBP","amount":10},"info":{"timestamp":1430068515,"quote":0.658443},"result":6.58443}'));
 
-    $this->assertInstanceOf(ConversionResult::class, $result);
+        $result = $this->driver->convert(10.0, Currency::USD, Currency::GBP);
 
-    $this->assertEquals(Symbol::USD, $result->getBaseCurrency());
-    $this->assertEquals('2005-02-01', $result->getDate());
+        $this->assertInstanceOf(ConversionResult::class, $result);
+        $this->assertEqualsWithDelta(0.658443, $result->rateAsFloat(Currency::GBP), 0.000001);
+    }
 
-    $this->assertEquals(3.67266, $result->rate(Symbol::AED));
-    $this->assertEquals(96.848753, $result->rate(Symbol::ALL));
-    $this->assertEquals(475.798297, $result->rate(Symbol::AMD));
-    $this->assertEquals(1.790403, $result->rate(Symbol::ANG));
-    $this->assertEquals(2.918969, $result->rate(Symbol::ARS));
-    $this->assertEquals(1.293878, $result->rate(Symbol::AUD));
-  }
+    #[Test]
+    public function can_handle_response_failures(): void
+    {
+        $this->harness->http->enqueue(new Response(200, [], '{"success":false,"error":{"code":104,"info":"Your monthly usage limit has been reached. Please upgrade your subscription plan."}}'));
 
-  /** @test */
-  public function fails_to_get_historical_rates_if_date_not_set()
-  {
-    $this->expectException(ApiException::class);
-    $this->currencyLayer->from(Symbol::USD)->to(Symbol::EUR)->historical();
-  }
+        $this->expectException(ApiException::class);
+        $this->driver->from(Currency::USD)->to(Currency::EUR)->get();
+    }
 
-  /** @test */
-  public function can_convert_currency_amounts()
-  {
-    // Response from https://currencylayer.com/documentation
-    $this->mockHandler->append(new Response(200, [], '{"success":true,"terms":"https://currencylayer.com/terms","privacy":"https://currencylayer.com/privacy","query":{"from":"USD","to":"GBP","amount":10},"info":{"timestamp":1430068515,"quote":0.658443},"result":6.58443}'));
+    #[Test]
+    public function access_key_is_added_to_request_query_string(): void
+    {
+        $this->harness->http->enqueue(new Response(200, [], '{"success":true,"timestamp":1700000000,"source":"USD","quotes":{"USDEUR":0.9}}'));
 
-    $result = $this->currencyLayer->convert(10, Symbol::USD, Symbol::GBP, 1430068515);
-    $this->assertEquals(6.58443, $result);
-  }
+        $this->driver->accessKey('cl-key')->from(Currency::USD)->get([Currency::EUR]);
 
-  /** @test */
-  public function can_handle_response_failures()
-  {
-    // Response from https://currencylayer.com/documentation
-    $this->mockHandler->append(new Response(200, [], '{"success":false,"error":{"code":104,"info":"Your monthly usage limit has been reached. Please upgrade your subscription plan."}}'));
-
-    $this->expectException(ApiException::class);
-    $this->currencyLayer->from(Symbol::USD)->to(Symbol::LTL)->get();
-  }
+        $uri = (string) $this->harness->http->lastRequest()?->getUri();
+        $this->assertStringContainsString('access_key=cl-key', $uri);
+        $this->assertStringContainsString('source=USD', $uri);
+        $this->assertStringContainsString('currencies=EUR', $uri);
+    }
 }

@@ -1,64 +1,81 @@
 {
-	"name": "otherguy/php-currency-api",
-	"description": "A PHP API Wrapper to offer a unified programming interface for popular Currency Rate APIs.",
-	"keywords": [
-		"currency",
-		"currency rates",
-		"exchange rates",
-		"currency conversion",
+  "name": "otherguy/php-currency-api",
+  "description": "A PHP API Wrapper to offer a unified programming interface for popular Currency Rate APIs.",
+  "keywords": [
     "currency",
-    "currency-exchange-rates",
-    "composer-package",
-    "php-library",
-    "currency-converter-php",
-    "currency-api",
+    "currency-rates",
     "exchange-rates",
-    "currency-rate-apis",
-    "fluent-interface",
-    "api-wrapper",
-    "currency-converter",
     "currency-conversion",
-    "currency-exchange",
+    "currency-converter",
+    "currency-api",
     "exchange-rate-api",
-    "exchange-rates-api",
-    "php-package",
-    "php8",
-    "php74",
-    "php73"
-	],
-	"type": "library",
-	"license": "MIT",
-	"authors": [
-		{
-			"name": "Alexander Graf",
-			"email": "alex@otherguy.io"
-		}
-	],
-	"require": {
-		"php": ">=7.3",
+    "fluent-interface",
+    "psr-18",
+    "php8"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Alexander Graf",
+      "email": "alex@otherguy.io"
+    }
+  ],
+  "require": {
+    "php": "^8.3",
     "ext-json": "*",
-		"guzzlehttp/guzzle": "^7.2"
-	},
-	"require-dev": {
-    "nikic/php-parser": "^4.10",
-		"php-coveralls/php-coveralls": "^2.4",
-		"phpunit/php-code-coverage": "^9.2",
-    "phpunit/phpunit": "^9.4"
-	},
-	"suggest": {
-		"ext-curl": "Faster HTTP requests"
-	},
-	"autoload": {
-		"psr-4": {
-			"Otherguy\\Currency\\": "src/"
-		}
-	},
-	"autoload-dev": {
-		"psr-4": {
-			"Currency\\Tests\\": "tests/"
-		}
-	},
-	"config": {
-		"sort-packages": true
-	}
+    "brick/math": "^0.12",
+    "psr/http-client": "^1.0",
+    "psr/http-factory": "^1.1",
+    "psr/http-message": "^1.1 || ^2.0"
+  },
+  "require-dev": {
+    "guzzlehttp/guzzle": "^7.9",
+    "http-interop/http-factory-guzzle": "^1.2",
+    "laravel/pint": "^1.18",
+    "php-coveralls/php-coveralls": "^2.7",
+    "phpstan/phpstan": "^2.0",
+    "phpstan/phpstan-phpunit": "^2.0",
+    "phpunit/phpunit": "^12.0",
+    "rector/rector": "^2.0"
+  },
+  "suggest": {
+    "guzzlehttp/guzzle": "PSR-18 HTTP client (^7.9), still the de-facto choice and what the test suite uses",
+    "symfony/http-client": "Alternative PSR-18 client (^7.0); pair with nyholm/psr7 for PSR-17 factories",
+    "nyholm/psr7": "Lightweight PSR-7/PSR-17 implementation, recommended with symfony/http-client"
+  },
+  "autoload": {
+    "psr-4": {
+      "Otherguy\\Currency\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Otherguy\\Currency\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit --no-coverage",
+    "test:coverage": "XDEBUG_MODE=coverage phpunit --coverage-text",
+    "lint": "pint --test",
+    "lint:fix": "pint",
+    "analyse": "phpstan analyse",
+    "rector": "rector --dry-run",
+    "rector:fix": "rector",
+    "check": [
+      "@lint",
+      "@analyse",
+      "@rector",
+      "@test"
+    ]
+  },
+  "config": {
+    "platform": {
+      "php": "8.3.30"
+    },
+    "sort-packages": true,
+    "allow-plugins": {
+      "php-http/discovery": true
+    }
+  }
 }

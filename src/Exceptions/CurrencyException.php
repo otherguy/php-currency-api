@@ -1,13 +1,11 @@
-<?php namespace Otherguy\Currency\Exceptions;
+<?php
+
+declare(strict_types=1);
+
+namespace Otherguy\Currency\Exceptions;
 
 use Exception;
-use Throwable;
 
-/**
- * Class CurrencyException
- *
- * @package Otherguy\Currency\Exceptions
- */
 class CurrencyException extends Exception
 {
 }

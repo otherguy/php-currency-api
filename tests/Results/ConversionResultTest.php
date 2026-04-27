@@ -1,118 +1,172 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Otherguy\Currency\Tests\Results;
+
+use Brick\Math\BigDecimal;
+use Otherguy\Currency\Currency;
 use Otherguy\Currency\Exceptions\CurrencyException;
 use Otherguy\Currency\Results\ConversionResult;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
-use Otherguy\Currency\Symbol;
 
-/**
- * ConversionResultTest
- */
 class ConversionResultTest extends TestCase
 {
-  /** @var ConversionResult */
-  private $classUnderTest;
+    private ConversionResult $result;
 
-  /**
-   *
-   */
-  protected function setUp(): void
-  {
-    $this->classUnderTest = new ConversionResult(Symbol::USD, 1560293762, [
-      'EUR' => 0.88,
-      'THB' => 31.27,
-    ]);
-  }
+    protected function setUp(): void
+    {
+        $this->result = new ConversionResult(Currency::USD, '2019-06-11', [
+          'EUR' => 0.88,
+          'THB' => 31.27,
+        ]);
+    }
 
-  /** @test */
-  public function construct_will_properly_set_parameters()
-  {
-    $this->assertEquals(Symbol::USD, $this->classUnderTest->getBaseCurrency());
-    $this->assertEquals('2019-06-11', $this->classUnderTest->getDate());
+    #[Test]
+    public function construct_will_properly_set_parameters(): void
+    {
+        $this->assertSame('USD', $this->result->getBaseCurrency());
+        $this->assertSame('2019-06-11', $this->result->getDate());
 
-    $result = new ConversionResult(Symbol::USD, '1936-07-21', [
-      'CNY' => 1.12,
-    ]);
+        $other = new ConversionResult(Currency::USD, '1936-07-21', ['CNY' => 1.12]);
+        $this->assertSame('1936-07-21', $other->getDate());
 
-    $this->assertEquals('1936-07-21', $result->getDate());
+        $third = new ConversionResult(Currency::EUR, '1990-10-05', ['LTL' => 3.45280]);
+        $this->assertSame('1990-10-05', $third->getDate());
+        $this->assertSame('EUR', $third->getBaseCurrency());
+    }
 
-    $result = new ConversionResult(Symbol::EUR, DateTime::createFromFormat('d.m.Y', '5.10.1990'), [
-      'LTL' => 3.45280,
-    ]);
+    #[Test]
+    public function returns_all_conversion_rates_including_base(): void
+    {
+        $rates = $this->result->all();
 
-    $this->assertEquals('1990-10-05', $result->getDate());
-    $this->assertEquals(Symbol::EUR, $result->getBaseCurrency());
-  }
+        $this->assertCount(3, $rates);
+        $this->assertArrayHasKey('USD', $rates);
+        $this->assertArrayHasKey('EUR', $rates);
+        $this->assertArrayHasKey('THB', $rates);
 
-  /** @test */
-  public function returns_all_conversion_rates()
-  {
-    $this->assertCount(3, $this->classUnderTest->all());
-    $this->assertArrayHasKey(Symbol::USD, $this->classUnderTest->all());
-    $this->assertArrayHasKey(Symbol::EUR, $this->classUnderTest->all());
-    $this->assertArrayHasKey(Symbol::THB, $this->classUnderTest->all());
-    $this->assertEquals(1, $this->classUnderTest->all()[Symbol::USD]);
-    $this->assertEquals(31.27, $this->classUnderTest->all()[Symbol::THB]);
-  }
+        $this->assertTrue(BigDecimal::one()->isEqualTo($rates['USD']));
+        $this->assertSame('31.27', (string) $rates['THB']);
+    }
 
-  /** @test */
-  public function fails_to_convert_if_target_currency_does_not_exist()
-  {
-    $this->expectException(CurrencyException::class);
-    $this->classUnderTest->convert(2, Symbol::EUR, Symbol::BTC);
-  }
+    #[Test]
+    public function all_as_floats_returns_native_floats(): void
+    {
+        $rates = $this->result->allAsFloats();
 
-  /** @test */
-  public function fails_to_convert_if_source_currency_does_not_exist()
-  {
-    $this->expectException(CurrencyException::class);
-    $this->classUnderTest->convert(2, Symbol::BTC, Symbol::EUR);
-  }
+        $this->assertSame(1.0, $rates['USD']);
+        $this->assertSame(0.88, $rates['EUR']);
+        $this->assertSame(31.27, $rates['THB']);
+    }
 
-  /** @test */
-  public function can_convert_between_currencies()
-  {
-    $result = $this->classUnderTest->convert(2, Symbol::EUR, Symbol::THB);
-    $this->assertEqualsWithDelta(71.06, $result, 0.1);
-  }
+    #[Test]
+    public function fails_to_convert_if_target_currency_does_not_exist(): void
+    {
+        $this->expectException(CurrencyException::class);
+        $this->result->convert(2, Currency::EUR, Currency::BTC);
+    }
 
-  /** @test */
-  public function fails_to_retrieve_rate_if_currency_does_not_exist()
-  {
-    $this->expectException(CurrencyException::class);
-    $this->classUnderTest->rate(Symbol::BTC);
-  }
+    #[Test]
+    public function fails_to_convert_if_source_currency_does_not_exist(): void
+    {
+        $this->expectException(CurrencyException::class);
+        $this->result->convert(2, Currency::BTC, Currency::EUR);
+    }
 
-  /** @test */
-  public function retrieves_currency_conversion_rate()
-  {
-    $this->assertEquals(31.27, $this->classUnderTest->rate(Symbol::THB));
-    $this->assertEquals(0.88, $this->classUnderTest->rate(Symbol::EUR));
-  }
+    #[Test]
+    public function can_convert_between_currencies(): void
+    {
+        $converted = $this->result->convert(2, Currency::EUR, Currency::THB);
 
-  /** @test */
-  public function fails_to_change_base_currency_if_currency_does_not_exist()
-  {
-    $this->expectException(CurrencyException::class);
-    $this->classUnderTest->setBaseCurrency(Symbol::BTC);
-  }
+        $this->assertEqualsWithDelta(71.06, $converted->toFloat(), 0.01);
+    }
 
-  /** @test */
-  public function can_reset_base_currency()
-  {
-    $this->classUnderTest->setBaseCurrency(Symbol::USD);
-    $this->assertEquals(0.88, $this->classUnderTest->rate(Symbol::EUR));
-    $this->assertEquals(1, $this->classUnderTest->rate(Symbol::USD));
-  }
+    #[Test]
+    public function fails_to_retrieve_rate_if_currency_does_not_exist(): void
+    {
+        $this->expectException(CurrencyException::class);
+        $this->result->rate(Currency::BTC);
+    }
 
-  /** @test */
-  public function can_change_base_currency()
-  {
-    $this->classUnderTest->setBaseCurrency(Symbol::EUR);
-    $this->assertEqualsWithDelta(1.14, $this->classUnderTest->rate(Symbol::USD), 0.1);
-    $this->assertEquals(1, $this->classUnderTest->rate(Symbol::EUR));
+    #[Test]
+    public function retrieves_currency_conversion_rate(): void
+    {
+        $this->assertSame('31.27', (string) $this->result->rate(Currency::THB));
+        $this->assertSame('0.88', (string) $this->result->rate(Currency::EUR));
+        $this->assertSame(31.27, $this->result->rateAsFloat(Currency::THB));
+    }
 
-    $this->assertEquals(1, $this->classUnderTest->convert(0.88, Symbol::EUR, Symbol::USD));
-    $this->assertEquals(1, $this->classUnderTest->convert(31.27, Symbol::THB, Symbol::USD));
-  }
+    #[Test]
+    public function fails_to_change_base_currency_if_currency_does_not_exist(): void
+    {
+        $this->expectException(CurrencyException::class);
+        $this->result->setBaseCurrency(Currency::BTC);
+    }
+
+    #[Test]
+    public function reset_to_original_base_currency_restores_original_rates(): void
+    {
+        $this->result->setBaseCurrency(Currency::EUR);
+        $this->result->setBaseCurrency(Currency::USD);
+
+        $this->assertSame('0.88', (string) $this->result->rate(Currency::EUR));
+        $this->assertTrue(BigDecimal::one()->isEqualTo($this->result->rate(Currency::USD)));
+    }
+
+    #[Test]
+    public function can_change_base_currency_and_convert_back_losslessly(): void
+    {
+        $this->result->setBaseCurrency(Currency::EUR);
+
+        $this->assertEqualsWithDelta(1.1363, $this->result->rateAsFloat(Currency::USD), 0.001);
+        $this->assertTrue(BigDecimal::one()->isEqualTo($this->result->rate(Currency::EUR)));
+
+        $this->assertSame('EUR', $this->result->getBaseCurrency());
+        $this->assertSame('USD', $this->result->originalBaseCurrency);
+    }
+
+    #[Test]
+    public function convert_round_trips_via_original_base(): void
+    {
+        $this->assertEqualsWithDelta(
+            1.0,
+            $this->result->convert(0.88, Currency::EUR, Currency::USD)->toFloat(),
+            0.0001,
+        );
+
+        $this->assertEqualsWithDelta(
+            1.0,
+            $this->result->convert(31.27, Currency::THB, Currency::USD)->toFloat(),
+            0.0001,
+        );
+    }
+
+    #[Test]
+    public function setting_base_to_self_returns_self(): void
+    {
+        $this->result->setBaseCurrency(Currency::USD);
+        $this->assertSame('USD', $this->result->getBaseCurrency());
+        $this->assertTrue(BigDecimal::one()->isEqualTo($this->result->rate(Currency::USD)));
+    }
+
+    #[Test]
+    public function constructor_accepts_string_base_currency(): void
+    {
+        $result = new ConversionResult('JPY', '2024-01-01', ['EUR' => '0.0061']);
+
+        $this->assertSame('JPY', $result->getBaseCurrency());
+        $this->assertSame('JPY', $result->originalBaseCurrency);
+    }
+
+    #[Test]
+    public function rates_can_be_passed_as_big_decimal_already(): void
+    {
+        $result = new ConversionResult(Currency::USD, '2024-01-01', [
+          'EUR' => BigDecimal::of('0.92'),
+        ]);
+
+        $this->assertSame('0.92', (string) $result->rate(Currency::EUR));
+    }
 }

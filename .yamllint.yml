@@ -1,0 +1,13 @@
+---
+extends: default
+yaml-files: ['*.yaml', '*.yml']
+rules:
+  line-length:
+    max: 300
+    level: warning
+ignore: |-
+  **/node_modules
+  **/vendor
+  .git
+  .specify
+  specs/
