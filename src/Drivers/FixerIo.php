@@ -29,9 +29,9 @@ class FixerIo extends BaseCurrencyDriver
         ]);
 
         return new ConversionResult(
-            (string) $response['base'],
-            (string) $response['date'],
-            $response['rates'],
+            $this->responseString($response, 'base', 'FixerIo'),
+            $this->responseString($response, 'date', 'FixerIo'),
+            $this->responseRates($response, 'rates', 'FixerIo'),
         );
     }
 
@@ -57,9 +57,9 @@ class FixerIo extends BaseCurrencyDriver
         ]);
 
         return new ConversionResult(
-            (string) $response['base'],
-            (string) $response['date'],
-            $response['rates'],
+            $this->responseString($response, 'base', 'FixerIo'),
+            $this->responseString($response, 'date', 'FixerIo'),
+            $this->responseRates($response, 'rates', 'FixerIo'),
         );
     }
 
@@ -105,12 +105,12 @@ class FixerIo extends BaseCurrencyDriver
 
         $response = $this->apiRequest('convert', $params);
 
-        $rate = BigDecimal::of((string) $response['result'])
+        $rate = BigDecimal::of($this->responseString($response, 'result', 'FixerIo'))
           ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HALF_UP);
 
         return new ConversionResult(
             $this->getBaseCurrency(),
-            isset($response['date']) ? (string) $response['date'] : $this->getDate(),
+            $this->optionalResponseString($response, 'date') ?? $this->getDate(),
             [$target => $rate],
         );
     }

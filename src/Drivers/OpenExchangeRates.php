@@ -43,9 +43,9 @@ class OpenExchangeRates extends BaseCurrencyDriver
         ]);
 
         return new ConversionResult(
-            (string) $response['base'],
-            $this->timestampToDate($response['timestamp']),
-            $response['rates'],
+            $this->responseString($response, 'base', 'OpenExchangeRates'),
+            $this->timestampToDate($this->responseInt($response, 'timestamp', 'OpenExchangeRates')),
+            $this->responseRates($response, 'rates', 'OpenExchangeRates'),
         );
     }
 
@@ -71,9 +71,9 @@ class OpenExchangeRates extends BaseCurrencyDriver
         ]);
 
         return new ConversionResult(
-            (string) $response['base'],
-            $this->timestampToDate($response['timestamp']),
-            $response['rates'],
+            $this->responseString($response, 'base', 'OpenExchangeRates'),
+            $this->timestampToDate($this->responseInt($response, 'timestamp', 'OpenExchangeRates')),
+            $this->responseRates($response, 'rates', 'OpenExchangeRates'),
         );
     }
 
@@ -109,12 +109,16 @@ class OpenExchangeRates extends BaseCurrencyDriver
 
         $response = $this->apiRequest("convert/{$this->amount}/{$this->getBaseCurrency()}/{$target}");
 
-        $rate = BigDecimal::of((string) $response['response'])
+        $rate = BigDecimal::of($this->responseString($response, 'response', 'OpenExchangeRates'))
           ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HALF_UP);
+
+        $meta = $response['meta'] ?? [];
+        $timestamp = is_array($meta) ? ($meta['timestamp'] ?? null) : null;
+        $timestamp = is_int($timestamp) || is_string($timestamp) ? $timestamp : null;
 
         return new ConversionResult(
             $this->getBaseCurrency(),
-            $this->getDate() ?? $this->timestampToDate($response['meta']['timestamp'] ?? null),
+            $this->getDate() ?? $this->timestampToDate($timestamp),
             [$target => $rate],
         );
     }
@@ -143,12 +147,12 @@ class OpenExchangeRates extends BaseCurrencyDriver
         return $response;
     }
 
-    private function timestampToDate(mixed $timestamp): ?string
+    private function timestampToDate(int|string|null $timestamp): ?string
     {
         if ($timestamp === null) {
             return null;
         }
 
-        return DateHelper::format(new DateTimeImmutable('@' . (int) $timestamp));
+        return DateHelper::format(new DateTimeImmutable('@' . $timestamp));
     }
 }

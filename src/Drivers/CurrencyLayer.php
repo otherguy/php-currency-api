@@ -36,9 +36,9 @@ class CurrencyLayer extends BaseCurrencyDriver
         ]);
 
         return new ConversionResult(
-            (string) $response['source'],
-            $this->timestampToDate($response['timestamp']),
-            $this->stripQuotes((array) $response['quotes']),
+            $this->responseString($response, 'source', 'CurrencyLayer'),
+            $this->timestampToDate($this->responseInt($response, 'timestamp', 'CurrencyLayer')),
+            $this->stripQuotes($this->responseRates($response, 'quotes', 'CurrencyLayer')),
         );
     }
 
@@ -65,9 +65,9 @@ class CurrencyLayer extends BaseCurrencyDriver
         ]);
 
         return new ConversionResult(
-            (string) $response['source'],
-            $this->timestampToDate($response['timestamp']),
-            $this->stripQuotes((array) $response['quotes']),
+            $this->responseString($response, 'source', 'CurrencyLayer'),
+            $this->timestampToDate($this->responseInt($response, 'timestamp', 'CurrencyLayer')),
+            $this->stripQuotes($this->responseRates($response, 'quotes', 'CurrencyLayer')),
         );
     }
 
@@ -113,12 +113,16 @@ class CurrencyLayer extends BaseCurrencyDriver
 
         $response = $this->apiRequest('convert', $params);
 
-        $rate = BigDecimal::of((string) $response['result'])
+        $rate = BigDecimal::of($this->responseString($response, 'result', 'CurrencyLayer'))
           ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HALF_UP);
+
+        $info = $response['info'] ?? [];
+        $timestamp = is_array($info) ? ($info['timestamp'] ?? null) : null;
+        $timestamp = is_int($timestamp) || is_string($timestamp) ? $timestamp : null;
 
         return new ConversionResult(
             $this->getBaseCurrency(),
-            $this->getDate() ?? $this->timestampToDate($response['info']['timestamp'] ?? null),
+            $this->getDate() ?? $this->timestampToDate($timestamp),
             [$target => $rate],
         );
     }
@@ -144,9 +148,9 @@ class CurrencyLayer extends BaseCurrencyDriver
     }
 
     /**
-     * @param array<string, scalar> $quotes
+     * @param array<string, BigDecimal|float|int|string> $quotes
      *
-     * @return array<string, scalar>
+     * @return array<string, BigDecimal|float|int|string>
      */
     private function stripQuotes(array $quotes): array
     {
@@ -158,12 +162,12 @@ class CurrencyLayer extends BaseCurrencyDriver
         return $rates;
     }
 
-    private function timestampToDate(mixed $timestamp): ?string
+    private function timestampToDate(int|string|null $timestamp): ?string
     {
         if ($timestamp === null) {
             return null;
         }
 
-        return DateHelper::format(new DateTimeImmutable('@' . (int) $timestamp));
+        return DateHelper::format(new DateTimeImmutable('@' . $timestamp));
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Otherguy\Currency\Drivers;
 
+use Brick\Math\BigDecimal;
 use DateTimeInterface;
 use JsonException;
 use Otherguy\Currency\Currency;
@@ -177,5 +178,65 @@ abstract class BaseCurrencyDriver implements CurrencyDriverContract
         }
 
         return $data;
+    }
+
+    /**
+     * @param array<array-key, mixed> $response
+     */
+    protected function responseString(array $response, string $key, string $provider): string
+    {
+        $value = $response[$key] ?? null;
+        if (!is_scalar($value)) {
+            throw new ApiException("{$provider} response did not contain {$key}.");
+        }
+
+        return (string) $value;
+    }
+
+    /**
+     * @param array<array-key, mixed> $response
+     */
+    protected function optionalResponseString(array $response, string $key): ?string
+    {
+        $value = $response[$key] ?? null;
+
+        return is_scalar($value) ? (string) $value : null;
+    }
+
+    /**
+     * @param array<array-key, mixed> $response
+     */
+    protected function responseInt(array $response, string $key, string $provider): int
+    {
+        $value = $response[$key] ?? null;
+        if (!is_scalar($value)) {
+            throw new ApiException("{$provider} response did not contain {$key}.");
+        }
+
+        return (int) $value;
+    }
+
+    /**
+     * @param array<array-key, mixed> $response
+     *
+     * @return array<string, BigDecimal|float|int|string>
+     */
+    protected function responseRates(array $response, string $key, string $provider): array
+    {
+        $rates = $response[$key] ?? null;
+        if (!is_array($rates)) {
+            throw new ApiException("{$provider} response did not contain {$key}.");
+        }
+
+        $normalised = [];
+        foreach ($rates as $currency => $rate) {
+            if (!$rate instanceof BigDecimal && !is_float($rate) && !is_int($rate) && !is_string($rate)) {
+                throw new ApiException("{$provider} response did not contain a numeric rate for {$currency}.");
+            }
+
+            $normalised[(string) $currency] = $rate;
+        }
+
+        return $normalised;
     }
 }

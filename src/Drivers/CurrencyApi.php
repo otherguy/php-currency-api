@@ -110,7 +110,8 @@ class CurrencyApi extends BaseCurrencyDriver
           'currencies'    => $target,
         ]);
 
-        $converted = $response['data']['value'] ?? null;
+        $data = $response['data'] ?? [];
+        $converted = is_array($data) ? ($data['value'] ?? null) : null;
         if (!is_scalar($converted)) {
             throw new ApiException('CurrencyAPI response did not contain a converted value.');
         }
@@ -144,7 +145,7 @@ class CurrencyApi extends BaseCurrencyDriver
     /**
      * @param mixed $data
      *
-     * @return array<string, scalar>
+     * @return array<string, BigDecimal|float|int|string>
      */
     private function ratesFromData(mixed $data): array
     {
@@ -154,11 +155,12 @@ class CurrencyApi extends BaseCurrencyDriver
 
         $rates = [];
         foreach ($data as $currency => $rateData) {
-            if (!is_array($rateData) || !isset($rateData['value']) || !is_scalar($rateData['value'])) {
+            $value = is_array($rateData) ? ($rateData['value'] ?? null) : null;
+            if (!$value instanceof BigDecimal && !is_float($value) && !is_int($value) && !is_string($value)) {
                 throw new ApiException('CurrencyAPI response did not contain a rate for ' . (string) $currency . '.');
             }
 
-            $rates[(string) $currency] = $rateData['value'];
+            $rates[(string) $currency] = $value;
         }
 
         return $rates;
@@ -169,7 +171,8 @@ class CurrencyApi extends BaseCurrencyDriver
      */
     private function responseDate(array $response): ?string
     {
-        $timestamp = $response['meta']['last_updated_at'] ?? null;
+        $meta = $response['meta'] ?? [];
+        $timestamp = is_array($meta) ? ($meta['last_updated_at'] ?? null) : null;
         if (!is_string($timestamp) || $timestamp === '') {
             return null;
         }

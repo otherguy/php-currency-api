@@ -35,9 +35,9 @@ class ExchangeRatesApi extends BaseCurrencyDriver
         ]);
 
         return new ConversionResult(
-            (string) $response['base'],
-            (string) $response['date'],
-            $response['rates'],
+            $this->responseString($response, 'base', 'ExchangeRatesApi'),
+            $this->responseString($response, 'date', 'ExchangeRatesApi'),
+            $this->responseRates($response, 'rates', 'ExchangeRatesApi'),
         );
     }
 
@@ -63,9 +63,9 @@ class ExchangeRatesApi extends BaseCurrencyDriver
         ]);
 
         return new ConversionResult(
-            (string) $response['base'],
-            (string) $response['date'],
-            $response['rates'],
+            $this->responseString($response, 'base', 'ExchangeRatesApi'),
+            $this->responseString($response, 'date', 'ExchangeRatesApi'),
+            $this->responseRates($response, 'rates', 'ExchangeRatesApi'),
         );
     }
 
@@ -111,12 +111,12 @@ class ExchangeRatesApi extends BaseCurrencyDriver
 
         $response = $this->apiRequest('convert', $params);
 
-        $rate = BigDecimal::of((string) $response['result'])
+        $rate = BigDecimal::of($this->responseString($response, 'result', 'ExchangeRatesApi'))
           ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HALF_UP);
 
         return new ConversionResult(
             $this->getBaseCurrency(),
-            isset($response['date']) ? (string) $response['date'] : $this->getDate(),
+            $this->optionalResponseString($response, 'date') ?? $this->getDate(),
             [$target => $rate],
         );
     }

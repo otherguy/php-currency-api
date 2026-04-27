@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<ruleset name="php-currency-api">
+    <description>PSR-12 checks for qlty/php-codesniffer.</description>
+
+    <file>src</file>
+    <file>examples</file>
+    <file>rector.php</file>
+
+    <exclude-pattern>build/*</exclude-pattern>
+    <exclude-pattern>tests/*</exclude-pattern>
+    <exclude-pattern>vendor/*</exclude-pattern>
+
+    <rule ref="PSR12">
+        <exclude name="Generic.Files.LineLength"/>
+    </rule>
+</ruleset>

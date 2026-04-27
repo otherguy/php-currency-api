@@ -20,6 +20,3 @@ parameters:
     -
       identifier: offsetAccess.nonOffsetAccessible
       path: src/Drivers/*.php
-    -
-      identifier: argument.type
-      path: src/Drivers/*.php

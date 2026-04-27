@@ -30,9 +30,9 @@ class Frankfurter extends BaseCurrencyDriver
         $response = $this->apiRequest('latest', $this->buildSymbolsParams());
 
         return new ConversionResult(
-            (string) $response['base'],
-            (string) $response['date'],
-            $response['rates'],
+            $this->responseString($response, 'base', 'Frankfurter'),
+            $this->responseString($response, 'date', 'Frankfurter'),
+            $this->responseRates($response, 'rates', 'Frankfurter'),
         );
     }
 
@@ -55,9 +55,9 @@ class Frankfurter extends BaseCurrencyDriver
         $response = $this->apiRequest($this->getDate(), $this->buildSymbolsParams());
 
         return new ConversionResult(
-            (string) $response['base'],
-            (string) $response['date'],
-            $response['rates'],
+            $this->responseString($response, 'base', 'Frankfurter'),
+            $this->responseString($response, 'date', 'Frankfurter'),
+            $this->responseRates($response, 'rates', 'Frankfurter'),
         );
     }
 

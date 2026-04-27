@@ -40,7 +40,7 @@ class FastForex extends BaseCurrencyDriver
         $response = $this->apiRequest($endpoint, $this->buildRateParams());
 
         return new ConversionResult(
-            (string) ($response['base'] ?? $this->getBaseCurrency()),
+            $this->optionalResponseString($response, 'base') ?? $this->getBaseCurrency(),
             $this->responseDate($response),
             $this->ratesFromResponse($response),
         );
@@ -68,8 +68,8 @@ class FastForex extends BaseCurrencyDriver
         ]);
 
         return new ConversionResult(
-            (string) ($response['base'] ?? $this->getBaseCurrency()),
-            (string) ($response['date'] ?? $this->getDate()),
+            $this->optionalResponseString($response, 'base') ?? $this->getBaseCurrency(),
+            $this->optionalResponseString($response, 'date') ?? $this->getDate(),
             $this->ratesFromResponse($response),
         );
     }
@@ -123,7 +123,7 @@ class FastForex extends BaseCurrencyDriver
           ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HALF_UP);
 
         return new ConversionResult(
-            (string) ($response['base'] ?? $this->getBaseCurrency()),
+            $this->optionalResponseString($response, 'base') ?? $this->getBaseCurrency(),
             $this->responseDate($response),
             [$target => $rate],
         );
@@ -165,7 +165,7 @@ class FastForex extends BaseCurrencyDriver
     /**
      * @param array<array-key, mixed> $response
      *
-     * @return array<string, scalar>
+     * @return array<string, BigDecimal|float|int|string>
      */
     private function ratesFromResponse(array $response): array
     {
@@ -176,7 +176,7 @@ class FastForex extends BaseCurrencyDriver
 
         $normalised = [];
         foreach ($rates as $currency => $rate) {
-            if (!is_scalar($rate)) {
+            if (!$rate instanceof BigDecimal && !is_float($rate) && !is_int($rate) && !is_string($rate)) {
                 throw new ApiException('fastFOREX response did not contain a rate for ' . (string) $currency . '.');
             }
 
