@@ -7,8 +7,8 @@ _A PHP API Wrapper offering a unified, fluent programming interface for popular 
 [![Version](https://img.shields.io/packagist/v/otherguy/php-currency-api.svg?style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
 [![Installs](https://img.shields.io/packagist/dt/otherguy/php-currency-api?color=blue&label=installs&style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
 [![PHP version](https://img.shields.io/packagist/php-v/otherguy/php-currency-api?style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
-[![CI](https://img.shields.io/github/actions/workflow/status/otherguy/php-currency-api/ci.yml?branch=master&style=flat-square)](https://github.com/otherguy/php-currency-api/actions)
-[![Coverage](https://img.shields.io/coveralls/otherguy/php-currency-api.svg?style=flat-square)](https://coveralls.io/github/otherguy/php-currency-api?branch=master)
+[![CI](https://img.shields.io/github/actions/workflow/status/otherguy/php-currency-api/ci.yml?branch=main&style=flat-square)](https://github.com/otherguy/php-currency-api/actions)
+[![Coverage](https://img.shields.io/coveralls/otherguy/php-currency-api.svg?style=flat-square)](https://coveralls.io/github/otherguy/php-currency-api?branch=main)
 [![License](https://img.shields.io/github/license/otherguy/php-currency-api.svg?style=flat-square&color=orange)](LICENSE.md)
 
 Don't worry about your favorite currency conversion service shutting down or changing plans. Switch providers without changing your code.

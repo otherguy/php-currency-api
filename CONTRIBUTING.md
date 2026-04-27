@@ -81,7 +81,7 @@ See the [driver guide](README.md#adding-a-new-driver) in the root README for the
 
 1. Bump the version in the relevant `CHANGELOG.md` heading and move `[Unreleased]` items under it.
 2. Tag: `git tag -s vX.Y.Z -m "Release X.Y.Z"`.
-3. Push: `git push origin master --tags`.
+3. Push: `git push origin main --tags`.
 4. Create a GitHub release pasting the changelog entry.
 5. Packagist auto-syncs; verify the new version appears.
 
