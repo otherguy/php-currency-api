@@ -1,152 +1,142 @@
-<?php namespace Otherguy\Currency\Drivers;
+<?php
 
-use DateTime;
+declare(strict_types=1);
+
+namespace Otherguy\Currency\Drivers;
+
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
+use DateTimeInterface;
+use Otherguy\Currency\Currency;
 use Otherguy\Currency\Exceptions\ApiException;
-use Otherguy\Currency\Exceptions\CurrencyException;
 use Otherguy\Currency\Results\ConversionResult;
-use Otherguy\Currency\Symbol;
+use Override;
 
-/**
- * Class FixerIo
- *
- * @package Otherguy\Currency\Drivers
- */
-class FixerIo extends BaseCurrencyDriver implements CurrencyDriverContract
+class FixerIo extends BaseCurrencyDriver
 {
-  protected $protocol = 'http';
-  protected $apiURL   = 'data.fixer.io/api';
+    protected string $apiURL       = 'data.fixer.io/api';
+    protected string $baseCurrency = 'EUR';
 
-  /** @var string $baseCurrency Fixer.io's Free Plan base currency is 'EUR' */
-  protected $baseCurrency = Symbol::EUR;
+    public function get(string|Currency|array $forCurrency = []): ConversionResult
+    {
+        if ($forCurrency !== []) {
+            $this->currencies($forCurrency);
+        }
 
+        $response = $this->apiRequest('latest', [
+          'base'    => $this->getBaseCurrency(),
+          'symbols' => implode(',', $this->getSymbols()),
+        ]);
 
-  /**
-   * @param string|array $forCurrency
-   *
-   * @return ConversionResult
-   *
-   * @throws CurrencyException
-   */
-  public function get($forCurrency = []): ConversionResult
-  {
-    if (!empty((array)$forCurrency)) {
-      $this->currencies((array)$forCurrency);
+        return new ConversionResult(
+            (string) $response['base'],
+            (string) $response['date'],
+            $response['rates'],
+        );
     }
 
-    // Get API response
-    $response = $this->apiRequest('latest', [
-      'base'    => $this->getBaseCurrency(),
-      'symbols' => join(',', $this->getSymbols()),
-    ]);
+    public function historical(
+        ?DateTimeInterface $date = null,
+        string|Currency|array $forCurrency = [],
+    ): ConversionResult {
+        if ($date instanceof DateTimeInterface) {
+            $this->date($date);
+        }
 
-    return new ConversionResult($response['base'], $response['date'], $response['rates']);
-  }
+        if ($forCurrency !== []) {
+            $this->currencies($forCurrency);
+        }
 
-  /**
-   * @param int|string|DateTime $date
-   * @param string|array        $forCurrency
-   *
-   * @return ConversionResult
-   *
-   * @throws CurrencyException
-   */
-  public function historical($date = null, $forCurrency = []): ConversionResult
-  {
-    // Set date
-    $this->date($date);
+        if ($this->getDate() === null) {
+            throw new ApiException('Date needs to be set!');
+        }
 
-    if (!empty((array)$forCurrency)) {
-      $this->currencies((array)$forCurrency);
+        $response = $this->apiRequest($this->getDate(), [
+          'base'    => $this->getBaseCurrency(),
+          'symbols' => implode(',', $this->getSymbols()),
+        ]);
+
+        return new ConversionResult(
+            (string) $response['base'],
+            (string) $response['date'],
+            $response['rates'],
+        );
     }
 
-    if (null === $this->getDate()) {
-      throw new ApiException('Date needs to be set!');
+    public function convert(
+        ?float $amount = null,
+        string|Currency|null $fromCurrency = null,
+        string|Currency|null $toCurrency = null,
+        ?DateTimeInterface $date = null,
+    ): ConversionResult {
+        if ($date instanceof DateTimeInterface) {
+            $this->date($date);
+        }
+
+        if ($amount !== null) {
+            $this->amount = $amount;
+        }
+
+        if ($fromCurrency !== null) {
+            $this->baseCurrency = Currency::code($fromCurrency);
+        }
+
+        if ($toCurrency !== null) {
+            $this->currencies = [Currency::code($toCurrency)];
+        }
+
+        $target = $this->currencies[0] ?? null;
+        if ($target === null) {
+            throw new ApiException('A target currency is required for convert().');
+        }
+        if ($this->amount === null) {
+            throw new ApiException('An amount is required for convert().');
+        }
+
+        $params = [
+          'from'   => $this->getBaseCurrency(),
+          'to'     => $target,
+          'amount' => $this->amount,
+        ];
+
+        if ($this->getDate() !== null) {
+            $params['date'] = $this->getDate();
+        }
+
+        $response = $this->apiRequest('convert', $params);
+
+        $rate = BigDecimal::of((string) $response['result'])
+          ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HALF_UP);
+
+        return new ConversionResult(
+            $this->getBaseCurrency(),
+            isset($response['date']) ? (string) $response['date'] : $this->getDate(),
+            [$target => $rate],
+        );
     }
 
-    // Get API response
-    $response = $this->apiRequest($this->getDate(), [
-      'base'    => $this->getBaseCurrency(),
-      'symbols' => join(',', $this->getSymbols()),
-    ]);
+    /**
+     * @param array<string, scalar> $params
+     *
+     * @return array<array-key, mixed>
+     */
+    #[Override]
+    protected function apiRequest(string $endpoint, array $params = []): array
+    {
+        $response = parent::apiRequest($endpoint, $params);
 
-    return new ConversionResult($response['base'], $response['date'], $response['rates']);
-  }
+        if (!($response['success'] ?? false)) {
+            $message = '';
+            if (isset($response['error']['type'])) {
+                $message = "[{$response['error']['type']}]";
+            }
+            if (isset($response['error']['info'])) {
+                $message .= ' ' . $response['error']['info'];
+            }
 
-  /**
-   * Converts any amount in a given currency to another currency.
-   *
-   * @param float               $amount       The amount to convert.
-   * @param string              $fromCurrency The base currency.
-   * @param string              $toCurrency   The target currency.
-   * @param int|string|DateTime $date         The date to get the conversion rate for.
-   *
-   * @return float The conversion result.
-   *
-   * @throws ApiException
-   */
-  public function convert(float $amount = null, string $fromCurrency = null, string $toCurrency = null, $date = null): float
-  {
-    // Set date
-    $this->date($date);
+            throw new ApiException(trim($message), (int) ($response['error']['code'] ?? 0));
+        }
 
-    // Overwrite/set params
-    if ($amount !== null) {
-      $this->amount = $amount;
+        return $response;
     }
-
-    if ($fromCurrency !== null) {
-      $this->baseCurrency = $fromCurrency;
-    }
-
-    if ($toCurrency !== null) {
-      $this->currencies = [$toCurrency];
-    }
-
-    $params = [
-      'from'   => $this->getBaseCurrency(),
-      'to'     => reset($this->currencies),
-      'amount' => $this->amount,
-    ];
-
-    if (null !== $this->getDate()) {
-      $params['date'] = $this->getDate();
-    }
-
-    // Get API response
-    $response = $this->apiRequest('convert', $params);
-
-    // Return the rate as a float
-    return floatval($response['result']);
-  }
-
-  /**
-   * Performs an HTTP request.
-   *
-   * @param string $endpoint The API endpoint.
-   * @param array  $params   The query parameters for this request.
-   * @param string $method   The HTTP method (defaults to 'GET').
-   *
-   * @return array|bool The response as decoded JSON.
-   *
-   * @throws ApiException
-   */
-  function apiRequest(string $endpoint, array $params = [], string $method = 'GET')
-  {
-    // Perform actual API request.
-    $response = parent::apiRequest($endpoint, $params, $method);
-
-    // Handle response exceptions.
-    if ($response['success'] == false) {
-      $message = '';
-      if (isset($response['error']['type'])) {
-        $message = "[{$response['error']['type']}]";
-      }
-      if (isset($response['error']['info'])) {
-        $message .= ' ' . $response['error']['info'];
-      }
-      throw new ApiException(trim($message), $response['error']['code']);
-    }
-
-    return $response;
-  }
 }

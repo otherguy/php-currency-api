@@ -14,15 +14,18 @@ use Otherguy\Currency\Helpers\DateHelper;
 use Otherguy\Currency\Results\ConversionResult;
 use Override;
 
-class CurrencyLayer extends BaseCurrencyDriver
+class CurrencyApi extends BaseCurrencyDriver
 {
-    protected string $apiURL       = 'apilayer.net/api';
+    protected string $apiURL       = 'api.currencyapi.com';
     protected string $baseCurrency = 'USD';
 
-    /** @var array<string, scalar> */
-    protected array $httpParams = [
-      'format' => 0,
-    ];
+    #[Override]
+    public function accessKey(string $accessKey): static
+    {
+        $this->httpHeaders['apikey'] = $accessKey;
+
+        return $this;
+    }
 
     public function get(string|Currency|array $forCurrency = []): ConversionResult
     {
@@ -30,15 +33,12 @@ class CurrencyLayer extends BaseCurrencyDriver
             $this->currencies($forCurrency);
         }
 
-        $response = $this->apiRequest('live', [
-          'source'     => $this->getBaseCurrency(),
-          'currencies' => implode(',', $this->getSymbols()),
-        ]);
+        $response = $this->apiRequest('v3/latest', $this->buildRateParams());
 
         return new ConversionResult(
-            (string) $response['source'],
-            $this->timestampToDate($response['timestamp']),
-            $this->stripQuotes((array) $response['quotes']),
+            $this->getBaseCurrency(),
+            $this->responseDate($response),
+            $this->ratesFromData($response['data'] ?? []),
         );
     }
 
@@ -58,16 +58,15 @@ class CurrencyLayer extends BaseCurrencyDriver
             throw new ApiException('Date needs to be set!');
         }
 
-        $response = $this->apiRequest('historical', [
-          'date'       => $this->getDate(),
-          'source'     => $this->getBaseCurrency(),
-          'currencies' => implode(',', $this->getSymbols()),
+        $response = $this->apiRequest('v3/historical', [
+          ...$this->buildRateParams(),
+          'date' => $this->getDate(),
         ]);
 
         return new ConversionResult(
-            (string) $response['source'],
-            $this->timestampToDate($response['timestamp']),
-            $this->stripQuotes((array) $response['quotes']),
+            $this->getBaseCurrency(),
+            $this->getDate(),
+            $this->ratesFromData($response['data'] ?? []),
         );
     }
 
@@ -101,69 +100,80 @@ class CurrencyLayer extends BaseCurrencyDriver
             throw new ApiException('An amount is required for convert().');
         }
 
-        $params = [
-          'from'   => $this->getBaseCurrency(),
-          'to'     => $target,
-          'amount' => $this->amount,
-        ];
-
         if ($this->getDate() !== null) {
-            $params['date'] = $this->getDate();
+            return $this->historical();
         }
 
-        $response = $this->apiRequest('convert', $params);
+        $response = $this->apiRequest('v3/convert', [
+          'value'         => $this->amount,
+          'base_currency' => $this->getBaseCurrency(),
+          'currencies'    => $target,
+        ]);
 
-        $rate = BigDecimal::of((string) $response['result'])
+        $converted = $response['data']['value'] ?? null;
+        if (!is_scalar($converted)) {
+            throw new ApiException('CurrencyAPI response did not contain a converted value.');
+        }
+
+        $rate = BigDecimal::of((string) $converted)
           ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HALF_UP);
 
         return new ConversionResult(
             $this->getBaseCurrency(),
-            $this->getDate() ?? $this->timestampToDate($response['info']['timestamp'] ?? null),
+            $this->responseDate($response),
             [$target => $rate],
         );
     }
 
     /**
-     * @param array<string, scalar> $params
-     *
-     * @return array<array-key, mixed>
+     * @return array<string, scalar>
      */
-    #[Override]
-    protected function apiRequest(string $endpoint, array $params = []): array
+    private function buildRateParams(): array
     {
-        $response = parent::apiRequest($endpoint, $params);
+        $params = [
+          'base_currency' => $this->getBaseCurrency(),
+        ];
 
-        if (!($response['success'] ?? false)) {
-            throw new ApiException(
-                (string) ($response['error']['info'] ?? 'CurrencyLayer API error'),
-                (int) ($response['error']['code'] ?? 0),
-            );
+        if ($this->getSymbols() !== []) {
+            $params['currencies'] = implode(',', $this->getSymbols());
         }
 
-        return $response;
+        return $params;
     }
 
     /**
-     * @param array<string, scalar> $quotes
+     * @param mixed $data
      *
      * @return array<string, scalar>
      */
-    private function stripQuotes(array $quotes): array
+    private function ratesFromData(mixed $data): array
     {
+        if (!is_array($data)) {
+            throw new ApiException('CurrencyAPI response did not contain rate data.');
+        }
+
         $rates = [];
-        foreach ($quotes as $currency => $rate) {
-            $rates[substr((string) $currency, 3, 3)] = $rate;
+        foreach ($data as $currency => $rateData) {
+            if (!is_array($rateData) || !isset($rateData['value']) || !is_scalar($rateData['value'])) {
+                throw new ApiException('CurrencyAPI response did not contain a rate for ' . (string) $currency . '.');
+            }
+
+            $rates[(string) $currency] = $rateData['value'];
         }
 
         return $rates;
     }
 
-    private function timestampToDate(mixed $timestamp): ?string
+    /**
+     * @param array<array-key, mixed> $response
+     */
+    private function responseDate(array $response): ?string
     {
-        if ($timestamp === null) {
+        $timestamp = $response['meta']['last_updated_at'] ?? null;
+        if (!is_string($timestamp) || $timestamp === '') {
             return null;
         }
 
-        return DateHelper::format(new DateTimeImmutable('@' . (int) $timestamp));
+        return DateHelper::format(new DateTimeImmutable($timestamp));
     }
 }

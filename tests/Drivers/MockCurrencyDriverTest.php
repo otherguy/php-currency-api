@@ -1,40 +1,62 @@
 <?php
 
-use Otherguy\Currency\DriverFactory;
-use Otherguy\Currency\Drivers\BaseCurrencyDriver;
+declare(strict_types=1);
+
+namespace Otherguy\Currency\Tests\Drivers;
+
+use Brick\Math\BigDecimal;
+use DateTimeImmutable;
+use Otherguy\Currency\Currency;
+use Otherguy\Currency\Drivers\MockCurrencyDriver;
 use Otherguy\Currency\Results\ConversionResult;
-use Otherguy\Currency\Symbol;
+use Otherguy\Currency\Tests\Support\DriverHarness;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-/**
- * MockCurrencyDriverTest
- */
 class MockCurrencyDriverTest extends TestCase
 {
+    private MockCurrencyDriver $driver;
 
-  /** @var BaseCurrencyDriver */
-  private $mockCurrencyDriver;
+    protected function setUp(): void
+    {
+        $driver = (new DriverHarness())->make('mock');
+        $this->assertInstanceOf(MockCurrencyDriver::class, $driver);
+        $this->driver = $driver;
+    }
 
-  protected function setUp(): void
-  {
-    $this->mockCurrencyDriver = DriverFactory::make('mock');
-  }
+    #[Test]
+    public function returns_conversion_result_for_get(): void
+    {
+        $this->assertInstanceOf(ConversionResult::class, $this->driver->get());
+    }
 
-  /** @test */
-  public function can_get_latest_rates()
-  {
-    $this->assertInstanceOf(ConversionResult::class, $this->mockCurrencyDriver->get());
-  }
+    #[Test]
+    public function returns_conversion_result_for_historical(): void
+    {
+        $result = $this->driver->historical(new DateTimeImmutable('2015-01-01'));
 
-  /** @test */
-  public function can_get_historical_rates()
-  {
-    $this->assertInstanceOf(ConversionResult::class, $this->mockCurrencyDriver->historical('2015-01-01'));
-  }
+        $this->assertInstanceOf(ConversionResult::class, $result);
+        $this->assertSame('2015-01-01', $result->getDate());
+    }
 
-  /** @test */
-  public function can_convert_currencies()
-  {
-    $this->assertEquals(12.34, $this->mockCurrencyDriver->convert(1, Symbol::USD, Symbol::EUR));
-  }
+    #[Test]
+    public function convert_returns_conversion_result_with_target_rate(): void
+    {
+        $result = $this->driver->convert(1.0, Currency::USD, Currency::EUR);
+
+        $this->assertInstanceOf(ConversionResult::class, $result);
+        $this->assertSame('USD', $result->getBaseCurrency());
+        $this->assertTrue(BigDecimal::of('12.34')->isEqualTo($result->rate(Currency::EUR)));
+    }
+
+    #[Test]
+    public function with_rates_seeds_get_response(): void
+    {
+        $this->driver->withRates(['EUR' => '0.92', 'GBP' => '0.79']);
+
+        $result = $this->driver->get();
+
+        $this->assertSame('0.92', (string) $result->rate(Currency::EUR));
+        $this->assertSame('0.79', (string) $result->rate(Currency::GBP));
+    }
 }

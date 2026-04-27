@@ -1,382 +1,241 @@
-<?php namespace Otherguy\Currency;
+<?php
 
-use ReflectionClass;
-use ReflectionException;
+declare(strict_types=1);
+
+namespace Otherguy\Currency;
 
 /**
- * Class Symbol
- *
- * @package Otherguy\Currency
+ * @deprecated since 2.0, use Otherguy\Currency\Currency
  */
-class Symbol
+final class Symbol
 {
-  public const AED = 'AED'; // United Arab Emirates Dirham
-  public const AFN = 'AFN'; // Afghan Afghani
-  public const ALL = 'ALL'; // Albanian Lek
-  public const AMD = 'AMD'; // Armenian Dram
-  public const ANG = 'ANG'; // Netherlands Antillean Guilder
-  public const AOA = 'AOA'; // Angolan Kwanza
-  public const ARS = 'ARS'; // Argentine Peso
-  public const AUD = 'AUD'; // Australian Dollar
-  public const AWG = 'AWG'; // Aruban Florin
-  public const AZN = 'AZN'; // Azerbaijani Manat
-  public const BAM = 'BAM'; // Bosnia Herzegovina Convertible Mark
-  public const BBD = 'BBD'; // Barbadian Dollar
-  public const BDT = 'BDT'; // Bangladeshi Taka
-  public const BGN = 'BGN'; // Bulgarian Lev
-  public const BHD = 'BHD'; // Bahraini Dinar
-  public const BIF = 'BIF'; // Burundian Franc
-  public const BMD = 'BMD'; // Bermudan Dollar
-  public const BND = 'BND'; // Brunei Dollar
-  public const BOB = 'BOB'; // Bolivian Boliviano
-  public const BRL = 'BRL'; // Brazilian Real
-  public const BSD = 'BSD'; // Bahamian Dollar
-  public const BTC = 'BTC'; // Bitcoin
-  public const BTN = 'BTN'; // Bhutanese Ngultrum
-  public const BWP = 'BWP'; // Botswanan Pula
-  public const BYR = 'BYR'; // Belarusian Ruble
-  public const BYN = 'BYN'; // New Belarusian Ruble
-  public const BZD = 'BZD'; // Belize Dollar
-  public const CAD = 'CAD'; // Canadian Dollar
-  public const CDF = 'CDF'; // Congolese Franc
-  public const CHF = 'CHF'; // Swiss Franc
-  public const CLF = 'CLF'; // Chilean Unit of Account
-  public const CLP = 'CLP'; // Chilean Peso
-  public const CNY = 'CNY'; // Chinese Yuan
-  public const COP = 'COP'; // Colombian Peso
-  public const CRC = 'CRC'; // Costa Rican Colón
-  public const CUC = 'CUC'; // Cuban Convertible Peso
-  public const CUP = 'CUP'; // Cuban Peso
-  public const CVE = 'CVE'; // Cape Verdean Escudo
-  public const CZK = 'CZK'; // Czech Republic Koruna
-  public const DJF = 'DJF'; // Djiboutian Franc
-  public const DKK = 'DKK'; // Danish Krone
-  public const DOP = 'DOP'; // Dominican Peso
-  public const DZD = 'DZD'; // Algerian Dinar
-  public const EGP = 'EGP'; // Egyptian Pound
-  public const ERN = 'ERN'; // Eritrean Nakfa
-  public const ETB = 'ETB'; // Ethiopian Birr
-  public const EUR = 'EUR'; // Euro
-  public const FJD = 'FJD'; // Fijian Dollar
-  public const FKP = 'FKP'; // Falkland Islands Pound
-  public const GBP = 'GBP'; // British Pound Sterling
-  public const GEL = 'GEL'; // Georgian Lari
-  public const GGP = 'GGP'; // Guernsey Pound
-  public const GHS = 'GHS'; // Ghanaian Cedi
-  public const GIP = 'GIP'; // Gibraltar Pound
-  public const GMD = 'GMD'; // Gambian Dalasi
-  public const GNF = 'GNF'; // Guinean Franc
-  public const GTQ = 'GTQ'; // Guatemalan Quetzal
-  public const GYD = 'GYD'; // Guyanaese Dollar
-  public const HKD = 'HKD'; // Hong Kong Dollar
-  public const HNL = 'HNL'; // Honduran Lempira
-  public const HRK = 'HRK'; // Croatian Kuna
-  public const HTG = 'HTG'; // Haitian Gourde
-  public const HUF = 'HUF'; // Hungarian Forint
-  public const IDR = 'IDR'; // Indonesian Rupiah
-  public const ILS = 'ILS'; // Israeli New Sheqel
-  public const IMP = 'IMP'; // Manx pound
-  public const INR = 'INR'; // Indian Rupee
-  public const IQD = 'IQD'; // Iraqi Dinar
-  public const IRR = 'IRR'; // Iranian Rial
-  public const ISK = 'ISK'; // Icelandic Króna
-  public const JEP = 'JEP'; // Jersey Pound
-  public const JMD = 'JMD'; // Jamaican Dollar
-  public const JOD = 'JOD'; // Jordanian Dinar
-  public const JPY = 'JPY'; // Japanese Yen
-  public const KES = 'KES'; // Kenyan Shilling
-  public const KGS = 'KGS'; // Kyrgystani Som
-  public const KHR = 'KHR'; // Cambodian Riel
-  public const KMF = 'KMF'; // Comorian Franc
-  public const KPW = 'KPW'; // North Korean Won
-  public const KRW = 'KRW'; // South Korean Won
-  public const KWD = 'KWD'; // Kuwaiti Dinar
-  public const KYD = 'KYD'; // Cayman Islands Dollar
-  public const KZT = 'KZT'; // Kazakhstani Tenge
-  public const LAK = 'LAK'; // Laotian Kip
-  public const LBP = 'LBP'; // Lebanese Pound
-  public const LKR = 'LKR'; // Sri Lankan Rupee
-  public const LRD = 'LRD'; // Liberian Dollar
-  public const LSL = 'LSL'; // Lesotho Loti
-  public const LTL = 'LTL'; // Lithuanian Litas
-  public const LVL = 'LVL'; // Latvian Lats
-  public const LYD = 'LYD'; // Libyan Dinar
-  public const MAD = 'MAD'; // Moroccan Dirham
-  public const MDL = 'MDL'; // Moldovan Leu
-  public const MGA = 'MGA'; // Malagasy Ariary
-  public const MKD = 'MKD'; // Macedonian Denar
-  public const MMK = 'MMK'; // Myanma Kyat
-  public const MNT = 'MNT'; // Mongolian Tugrik
-  public const MOP = 'MOP'; // Macanese Pataca
-  public const MRO = 'MRO'; // Mauritanian Ouguiya
-  public const MUR = 'MUR'; // Mauritian Rupee
-  public const MVR = 'MVR'; // Maldivian Rufiyaa
-  public const MWK = 'MWK'; // Malawian Kwacha
-  public const MXN = 'MXN'; // Mexican Peso
-  public const MYR = 'MYR'; // Malaysian Ringgit
-  public const MZN = 'MZN'; // Mozambican Metical
-  public const NAD = 'NAD'; // Namibian Dollar
-  public const NGN = 'NGN'; // Nigerian Naira
-  public const NIO = 'NIO'; // Nicaraguan Córdoba
-  public const NOK = 'NOK'; // Norwegian Krone
-  public const NPR = 'NPR'; // Nepalese Rupee
-  public const NZD = 'NZD'; // New Zealand Dollar
-  public const OMR = 'OMR'; // Omani Rial
-  public const PAB = 'PAB'; // Panamanian Balboa
-  public const PEN = 'PEN'; // Peruvian Nuevo Sol
-  public const PGK = 'PGK'; // Papua New Guinean Kina
-  public const PHP = 'PHP'; // Philippine Peso
-  public const PKR = 'PKR'; // Pakistani Rupee
-  public const PLN = 'PLN'; // Polish Zloty
-  public const PYG = 'PYG'; // Paraguayan Guarani
-  public const QAR = 'QAR'; // Qatari Rial
-  public const RON = 'RON'; // Romanian Leu
-  public const RSD = 'RSD'; // Serbian Dinar
-  public const RUB = 'RUB'; // Russian Ruble
-  public const RWF = 'RWF'; // Rwandan Franc
-  public const SAR = 'SAR'; // Saudi Riyal
-  public const SBD = 'SBD'; // Solomon Islands Dollar
-  public const SCR = 'SCR'; // Seychellois Rupee
-  public const SDG = 'SDG'; // Sudanese Pound
-  public const SEK = 'SEK'; // Swedish Krona
-  public const SGD = 'SGD'; // Singapore Dollar
-  public const SHP = 'SHP'; // Saint Helena Pound
-  public const SLL = 'SLL'; // Sierra Leonean Leone
-  public const SOS = 'SOS'; // Somali Shilling
-  public const SRD = 'SRD'; // Surinamese Dollar
-  public const STD = 'STD'; // São Tomé and Príncipe Dobra
-  public const SVC = 'SVC'; // Salvadoran Colón
-  public const SYP = 'SYP'; // Syrian Pound
-  public const SZL = 'SZL'; // Swazi Lilangeni
-  public const THB = 'THB'; // Thai Baht
-  public const TJS = 'TJS'; // Tajikistani Somoni
-  public const TMT = 'TMT'; // Turkmenistani Manat
-  public const TND = 'TND'; // Tunisian Dinar
-  public const TOP = 'TOP'; // Tongan Paʻanga
-  public const TRY = 'TRY'; // Turkish Lira
-  public const TTD = 'TTD'; // Trinidad and Tobago Dollar
-  public const TWD = 'TWD'; // New Taiwan Dollar
-  public const TZS = 'TZS'; // Tanzanian Shilling
-  public const UAH = 'UAH'; // Ukrainian Hryvnia
-  public const UGX = 'UGX'; // Ugandan Shilling
-  public const USD = 'USD'; // United States Dollar
-  public const UYU = 'UYU'; // Uruguayan Peso
-  public const UZS = 'UZS'; // Uzbekistan Som
-  public const VEF = 'VEF'; // Venezuelan Bolívar Fuerte
-  public const VND = 'VND'; // Vietnamese Dong
-  public const VUV = 'VUV'; // Vanuatu Vatu
-  public const WST = 'WST'; // Samoan Tala
-  public const XAF = 'XAF'; // CFA Franc BEAC
-  public const XAG = 'XAG'; // Silver
-  public const XAU = 'XAU'; // Gold
-  public const XCD = 'XCD'; // East Caribbean Dollar
-  public const XDR = 'XDR'; // Special Drawing Rights
-  public const XOF = 'XOF'; // CFA Franc BCEAO
-  public const XPF = 'XPF'; // CFP Franc
-  public const YER = 'YER'; // Yemeni Rial
-  public const ZAR = 'ZAR'; // South African Rand
-  public const ZMW = 'ZMW'; // Zambian Kwacha
-  public const ZWL = 'ZWL'; // Zimbabwean Dollar
+    public const string AED = 'AED';
+    public const string AFN = 'AFN';
+    public const string ALL = 'ALL';
+    public const string AMD = 'AMD';
+    public const string ANG = 'ANG';
+    public const string AOA = 'AOA';
+    public const string ARS = 'ARS';
+    public const string AUD = 'AUD';
+    public const string AWG = 'AWG';
+    public const string AZN = 'AZN';
+    public const string BAM = 'BAM';
+    public const string BBD = 'BBD';
+    public const string BDT = 'BDT';
+    public const string BGN = 'BGN';
+    public const string BHD = 'BHD';
+    public const string BIF = 'BIF';
+    public const string BMD = 'BMD';
+    public const string BND = 'BND';
+    public const string BOB = 'BOB';
+    public const string BRL = 'BRL';
+    public const string BSD = 'BSD';
+    public const string BTC = 'BTC';
+    public const string BTN = 'BTN';
+    public const string BWP = 'BWP';
+    public const string BYR = 'BYR';
+    public const string BYN = 'BYN';
+    public const string BZD = 'BZD';
+    public const string CAD = 'CAD';
+    public const string CDF = 'CDF';
+    public const string CHF = 'CHF';
+    public const string CLF = 'CLF';
+    public const string CLP = 'CLP';
+    public const string CNY = 'CNY';
+    public const string COP = 'COP';
+    public const string CRC = 'CRC';
+    public const string CUC = 'CUC';
+    public const string CUP = 'CUP';
+    public const string CVE = 'CVE';
+    public const string CZK = 'CZK';
+    public const string DJF = 'DJF';
+    public const string DKK = 'DKK';
+    public const string DOP = 'DOP';
+    public const string DZD = 'DZD';
+    public const string EGP = 'EGP';
+    public const string ERN = 'ERN';
+    public const string ETB = 'ETB';
+    public const string EUR = 'EUR';
+    public const string FJD = 'FJD';
+    public const string FKP = 'FKP';
+    public const string GBP = 'GBP';
+    public const string GEL = 'GEL';
+    public const string GGP = 'GGP';
+    public const string GHS = 'GHS';
+    public const string GIP = 'GIP';
+    public const string GMD = 'GMD';
+    public const string GNF = 'GNF';
+    public const string GTQ = 'GTQ';
+    public const string GYD = 'GYD';
+    public const string HKD = 'HKD';
+    public const string HNL = 'HNL';
+    public const string HRK = 'HRK';
+    public const string HTG = 'HTG';
+    public const string HUF = 'HUF';
+    public const string IDR = 'IDR';
+    public const string ILS = 'ILS';
+    public const string IMP = 'IMP';
+    public const string INR = 'INR';
+    public const string IQD = 'IQD';
+    public const string IRR = 'IRR';
+    public const string ISK = 'ISK';
+    public const string JEP = 'JEP';
+    public const string JMD = 'JMD';
+    public const string JOD = 'JOD';
+    public const string JPY = 'JPY';
+    public const string KES = 'KES';
+    public const string KGS = 'KGS';
+    public const string KHR = 'KHR';
+    public const string KMF = 'KMF';
+    public const string KPW = 'KPW';
+    public const string KRW = 'KRW';
+    public const string KWD = 'KWD';
+    public const string KYD = 'KYD';
+    public const string KZT = 'KZT';
+    public const string LAK = 'LAK';
+    public const string LBP = 'LBP';
+    public const string LKR = 'LKR';
+    public const string LRD = 'LRD';
+    public const string LSL = 'LSL';
+    public const string LTL = 'LTL';
+    public const string LVL = 'LVL';
+    public const string LYD = 'LYD';
+    public const string MAD = 'MAD';
+    public const string MDL = 'MDL';
+    public const string MGA = 'MGA';
+    public const string MKD = 'MKD';
+    public const string MMK = 'MMK';
+    public const string MNT = 'MNT';
+    public const string MOP = 'MOP';
+    public const string MRO = 'MRO';
+    public const string MUR = 'MUR';
+    public const string MVR = 'MVR';
+    public const string MWK = 'MWK';
+    public const string MXN = 'MXN';
+    public const string MYR = 'MYR';
+    public const string MZN = 'MZN';
+    public const string NAD = 'NAD';
+    public const string NGN = 'NGN';
+    public const string NIO = 'NIO';
+    public const string NOK = 'NOK';
+    public const string NPR = 'NPR';
+    public const string NZD = 'NZD';
+    public const string OMR = 'OMR';
+    public const string PAB = 'PAB';
+    public const string PEN = 'PEN';
+    public const string PGK = 'PGK';
+    public const string PHP = 'PHP';
+    public const string PKR = 'PKR';
+    public const string PLN = 'PLN';
+    public const string PYG = 'PYG';
+    public const string QAR = 'QAR';
+    public const string RON = 'RON';
+    public const string RSD = 'RSD';
+    public const string RUB = 'RUB';
+    public const string RWF = 'RWF';
+    public const string SAR = 'SAR';
+    public const string SBD = 'SBD';
+    public const string SCR = 'SCR';
+    public const string SDG = 'SDG';
+    public const string SEK = 'SEK';
+    public const string SGD = 'SGD';
+    public const string SHP = 'SHP';
+    public const string SLL = 'SLL';
+    public const string SOS = 'SOS';
+    public const string SRD = 'SRD';
+    public const string STD = 'STD';
+    public const string SVC = 'SVC';
+    public const string SYP = 'SYP';
+    public const string SZL = 'SZL';
+    public const string THB = 'THB';
+    public const string TJS = 'TJS';
+    public const string TMT = 'TMT';
+    public const string TND = 'TND';
+    public const string TOP = 'TOP';
+    public const string TRY = 'TRY';
+    public const string TTD = 'TTD';
+    public const string TWD = 'TWD';
+    public const string TZS = 'TZS';
+    public const string UAH = 'UAH';
+    public const string UGX = 'UGX';
+    public const string USD = 'USD';
+    public const string UYU = 'UYU';
+    public const string UZS = 'UZS';
+    public const string VEF = 'VEF';
+    public const string VND = 'VND';
+    public const string VUV = 'VUV';
+    public const string WST = 'WST';
+    public const string XAF = 'XAF';
+    public const string XAG = 'XAG';
+    public const string XAU = 'XAU';
+    public const string XCD = 'XCD';
+    public const string XDR = 'XDR';
+    public const string XOF = 'XOF';
+    public const string XPF = 'XPF';
+    public const string YER = 'YER';
+    public const string ZAR = 'ZAR';
+    public const string ZMW = 'ZMW';
+    public const string ZWL = 'ZWL';
 
-  protected static $currencyNames = [
-    'AED' => 'United Arab Emirates Dirham',
-    'AFN' => 'Afghan Afghani',
-    'ALL' => 'Albanian Lek',
-    'AMD' => 'Armenian Dram',
-    'ANG' => 'Netherlands Antillean Guilder',
-    'AOA' => 'Angolan Kwanza',
-    'ARS' => 'Argentine Peso',
-    'AUD' => 'Australian Dollar',
-    'AWG' => 'Aruban Florin',
-    'AZN' => 'Azerbaijani Manat',
-    'BAM' => 'Bosnia Herzegovina Convertible Mark',
-    'BBD' => 'Barbadian Dollar',
-    'BDT' => 'Bangladeshi Taka',
-    'BGN' => 'Bulgarian Lev',
-    'BHD' => 'Bahraini Dinar',
-    'BIF' => 'Burundian Franc',
-    'BMD' => 'Bermudan Dollar',
-    'BND' => 'Brunei Dollar',
-    'BOB' => 'Bolivian Boliviano',
-    'BRL' => 'Brazilian Real',
-    'BSD' => 'Bahamian Dollar',
-    'BTC' => 'Bitcoin',
-    'BTN' => 'Bhutanese Ngultrum',
-    'BWP' => 'Botswanan Pula',
-    'BYR' => 'Belarusian Ruble',
-    'BYN' => 'New Belarusian Ruble',
-    'BZD' => 'Belize Dollar',
-    'CAD' => 'Canadian Dollar',
-    'CDF' => 'Congolese Franc',
-    'CHF' => 'Swiss Franc',
-    'CLF' => 'Chilean Unit of Account',
-    'CLP' => 'Chilean Peso',
-    'CNY' => 'Chinese Yuan',
-    'COP' => 'Colombian Peso',
-    'CRC' => 'Costa Rican Colón',
-    'CUC' => 'Cuban Convertible Peso',
-    'CUP' => 'Cuban Peso',
-    'CVE' => 'Cape Verdean Escudo',
-    'CZK' => 'Czech Republic Koruna',
-    'DJF' => 'Djiboutian Franc',
-    'DKK' => 'Danish Krone',
-    'DOP' => 'Dominican Peso',
-    'DZD' => 'Algerian Dinar',
-    'EGP' => 'Egyptian Pound',
-    'ERN' => 'Eritrean Nakfa',
-    'ETB' => 'Ethiopian Birr',
-    'EUR' => 'Euro',
-    'FJD' => 'Fijian Dollar',
-    'FKP' => 'Falkland Islands Pound',
-    'GBP' => 'British Pound Sterling',
-    'GEL' => 'Georgian Lari',
-    'GGP' => 'Guernsey Pound',
-    'GHS' => 'Ghanaian Cedi',
-    'GIP' => 'Gibraltar Pound',
-    'GMD' => 'Gambian Dalasi',
-    'GNF' => 'Guinean Franc',
-    'GTQ' => 'Guatemalan Quetzal',
-    'GYD' => 'Guyanaese Dollar',
-    'HKD' => 'Hong Kong Dollar',
-    'HNL' => 'Honduran Lempira',
-    'HRK' => 'Croatian Kuna',
-    'HTG' => 'Haitian Gourde',
-    'HUF' => 'Hungarian Forint',
-    'IDR' => 'Indonesian Rupiah',
-    'ILS' => 'Israeli New Sheqel',
-    'IMP' => 'Manx pound',
-    'INR' => 'Indian Rupee',
-    'IQD' => 'Iraqi Dinar',
-    'IRR' => 'Iranian Rial',
-    'ISK' => 'Icelandic Króna',
-    'JEP' => 'Jersey Pound',
-    'JMD' => 'Jamaican Dollar',
-    'JOD' => 'Jordanian Dinar',
-    'JPY' => 'Japanese Yen',
-    'KES' => 'Kenyan Shilling',
-    'KGS' => 'Kyrgystani Som',
-    'KHR' => 'Cambodian Riel',
-    'KMF' => 'Comorian Franc',
-    'KPW' => 'North Korean Won',
-    'KRW' => 'South Korean Won',
-    'KWD' => 'Kuwaiti Dinar',
-    'KYD' => 'Cayman Islands Dollar',
-    'KZT' => 'Kazakhstani Tenge',
-    'LAK' => 'Laotian Kip',
-    'LBP' => 'Lebanese Pound',
-    'LKR' => 'Sri Lankan Rupee',
-    'LRD' => 'Liberian Dollar',
-    'LSL' => 'Lesotho Loti',
-    'LTL' => 'Lithuanian Litas',
-    'LVL' => 'Latvian Lats',
-    'LYD' => 'Libyan Dinar',
-    'MAD' => 'Moroccan Dirham',
-    'MDL' => 'Moldovan Leu',
-    'MGA' => 'Malagasy Ariary',
-    'MKD' => 'Macedonian Denar',
-    'MMK' => 'Myanma Kyat',
-    'MNT' => 'Mongolian Tugrik',
-    'MOP' => 'Macanese Pataca',
-    'MRO' => 'Mauritanian Ouguiya',
-    'MUR' => 'Mauritian Rupee',
-    'MVR' => 'Maldivian Rufiyaa',
-    'MWK' => 'Malawian Kwacha',
-    'MXN' => 'Mexican Peso',
-    'MYR' => 'Malaysian Ringgit',
-    'MZN' => 'Mozambican Metical',
-    'NAD' => 'Namibian Dollar',
-    'NGN' => 'Nigerian Naira',
-    'NIO' => 'Nicaraguan Córdoba',
-    'NOK' => 'Norwegian Krone',
-    'NPR' => 'Nepalese Rupee',
-    'NZD' => 'New Zealand Dollar',
-    'OMR' => 'Omani Rial',
-    'PAB' => 'Panamanian Balboa',
-    'PEN' => 'Peruvian Nuevo Sol',
-    'PGK' => 'Papua New Guinean Kina',
-    'PHP' => 'Philippine Peso',
-    'PKR' => 'Pakistani Rupee',
-    'PLN' => 'Polish Zloty',
-    'PYG' => 'Paraguayan Guarani',
-    'QAR' => 'Qatari Rial',
-    'RON' => 'Romanian Leu',
-    'RSD' => 'Serbian Dinar',
-    'RUB' => 'Russian Ruble',
-    'RWF' => 'Rwandan Franc',
-    'SAR' => 'Saudi Riyal',
-    'SBD' => 'Solomon Islands Dollar',
-    'SCR' => 'Seychellois Rupee',
-    'SDG' => 'Sudanese Pound',
-    'SEK' => 'Swedish Krona',
-    'SGD' => 'Singapore Dollar',
-    'SHP' => 'Saint Helena Pound',
-    'SLL' => 'Sierra Leonean Leone',
-    'SOS' => 'Somali Shilling',
-    'SRD' => 'Surinamese Dollar',
-    'STD' => 'São Tomé and Príncipe Dobra',
-    'SVC' => 'Salvadoran Colón',
-    'SYP' => 'Syrian Pound',
-    'SZL' => 'Swazi Lilangeni',
-    'THB' => 'Thai Baht',
-    'TJS' => 'Tajikistani Somoni',
-    'TMT' => 'Turkmenistani Manat',
-    'TND' => 'Tunisian Dinar',
-    'TOP' => 'Tongan Paʻanga',
-    'TRY' => 'Turkish Lira',
-    'TTD' => 'Trinidad and Tobago Dollar',
-    'TWD' => 'New Taiwan Dollar',
-    'TZS' => 'Tanzanian Shilling',
-    'UAH' => 'Ukrainian Hryvnia',
-    'UGX' => 'Ugandan Shilling',
-    'USD' => 'United States Dollar',
-    'UYU' => 'Uruguayan Peso',
-    'UZS' => 'Uzbekistan Som',
-    'VEF' => 'Venezuelan Bolívar Fuerte',
-    'VND' => 'Vietnamese Dong',
-    'VUV' => 'Vanuatu Vatu',
-    'WST' => 'Samoan Tala',
-    'XAF' => 'CFA Franc BEAC',
-    'XAG' => 'Silver',
-    'XAU' => 'Gold',
-    'XCD' => 'East Caribbean Dollar',
-    'XDR' => 'Special Drawing Rights',
-    'XOF' => 'CFA Franc BCEAO',
-    'XPF' => 'CFP Franc',
-    'YER' => 'Yemeni Rial',
-    'ZAR' => 'South African Rand',
-    'ZMW' => 'Zambian Kwacha',
-    'ZWL' => 'Zimbabwean Dollar',
-  ];
+    private static bool $deprecationNoticed = false;
 
-  /**
-   * @return array
-   *
-   * @throws ReflectionException
-   */
-  public static function all(): array
-  {
-    return array_values((new ReflectionClass(static::class))->getConstants());
-  }
+    /**
+     * @return list<string>
+     *
+     * @deprecated since 2.0, use Otherguy\Currency\Currency::cases() and ->value
+     */
+    public static function all(): array
+    {
+        self::noticeDeprecation();
 
-  /**
-   * Retrieve the name of a currency by its symbol.
-   *
-   * @param mixed $currency The currency symbol.
-   *
-   * @return string
-   */
-  public static function name(string $currency): string
-  {
-    return isset(static::$currencyNames[$currency]) ? static::$currencyNames[$currency] : null;
-  }
+        return array_map(static fn (Currency $c): string => $c->value, Currency::cases());
+    }
 
-  /**
-   * Retrieve an array of all currencies with their names.
-   *
-   * @return array
-   */
-  public static function names(): array
-  {
-    return static::$currencyNames;
-  }
+    /**
+     * @deprecated since 2.0, use Otherguy\Currency\Currency::tryFrom($currency)?->displayName()
+     */
+    public static function name(string $currency): string
+    {
+        self::noticeDeprecation();
+
+        return Currency::tryFrom($currency)?->displayName() ?? '';
+    }
+
+    /**
+     * @return array<string, string>
+     *
+     * @deprecated since 2.0, build via array_combine of Currency::cases()
+     */
+    public static function names(): array
+    {
+        self::noticeDeprecation();
+
+        $names = [];
+        foreach (Currency::cases() as $case) {
+            $names[$case->value] = $case->displayName();
+        }
+
+        return $names;
+    }
+
+    /**
+     * @internal Test-only helper to re-arm the once-per-process deprecation notice.
+     */
+    public static function resetDeprecationNotice(): void
+    {
+        self::$deprecationNoticed = false;
+    }
+
+    private static function noticeDeprecation(): void
+    {
+        if (self::$deprecationNoticed) {
+            return;
+        }
+
+        self::$deprecationNoticed = true;
+        trigger_error(
+            'Otherguy\\Currency\\Symbol is deprecated since 2.0. Use Otherguy\\Currency\\Currency instead.',
+            E_USER_DEPRECATED,
+        );
+    }
 }

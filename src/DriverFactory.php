@@ -1,58 +1,147 @@
-<?php namespace Otherguy\Currency;
+<?php
 
-use GuzzleHttp\Client as HTTPClient;
-use GuzzleHttp\ClientInterface;
-use Otherguy\Currency\Drivers\CurrencyLayer;
+declare(strict_types=1);
+
+namespace Otherguy\Currency;
+
+use GuzzleHttp\Client as GuzzleClient;
+use Http\Factory\Guzzle\RequestFactory as GuzzleRequestFactory;
+use Otherguy\Currency\Drivers\CurrencyApi;
 use Otherguy\Currency\Drivers\CurrencyDriverContract;
+use Otherguy\Currency\Drivers\CurrencyLayer;
+use Otherguy\Currency\Drivers\ExchangeRatesApi;
+use Otherguy\Currency\Drivers\FastForex;
 use Otherguy\Currency\Drivers\FixerIo;
+use Otherguy\Currency\Drivers\Frankfurter;
 use Otherguy\Currency\Drivers\MockCurrencyDriver;
 use Otherguy\Currency\Drivers\OpenExchangeRates;
-use Otherguy\Currency\Drivers\ExchangeRatesApi;
 use Otherguy\Currency\Exceptions\DriverNotFoundException;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
+use RuntimeException;
 
-/**
- * Class DriverFactory
- *
- * @package Otherguy\Currency
- */
 class DriverFactory
 {
-  protected const DRIVERS = [
-    'mock'              => MockCurrencyDriver::class,
-    'fixerio'           => FixerIo::class,
-    'currencylayer'     => CurrencyLayer::class,
-    'openexchangerates' => OpenExchangeRates::class,
-    'exchangeratesapi'  => ExchangeRatesApi::class,
-  ];
+    /**
+     * @var array<string, class-string<CurrencyDriverContract>>
+     */
+    private array $drivers;
 
-  /**
-   * @param string               $name
-   * @param ClientInterface|null $client
-   *
-   * @return CurrencyDriverContract
-   *
-   * @throws DriverNotFoundException
-   */
-  public static function make(string $name, ClientInterface $client = null): CurrencyDriverContract
-  {
-    if (!isset(static::DRIVERS[$name])) {
-      throw new DriverNotFoundException("{$name} is not a valid driver.");
+    private static ?self $defaultInstance = null;
+
+    /**
+     * @param array<string, class-string<CurrencyDriverContract>>|null $drivers
+     */
+    public function __construct(?array $drivers = null)
+    {
+        $this->drivers = $drivers ?? [
+          'mock'              => MockCurrencyDriver::class,
+          'fixerio'           => FixerIo::class,
+          'currencylayer'     => CurrencyLayer::class,
+          'openexchangerates' => OpenExchangeRates::class,
+          'exchangeratesapi'  => ExchangeRatesApi::class,
+          'frankfurter'       => Frankfurter::class,
+          'currencyapi'       => CurrencyApi::class,
+          'fastforex'         => FastForex::class,
+        ];
     }
 
-    $class = static::DRIVERS[$name];
+    /**
+     * @param class-string<CurrencyDriverContract> $driverClass
+     */
+    public function register(string $name, string $driverClass): self
+    {
+        $this->drivers[$name] = $driverClass;
 
-    // If no client is specified, create a HTTPClient instance.
-    $client = $client == null ? new HTTPClient() : $client;
-    return new $class($client);
-  }
+        return $this;
+    }
 
-  /**
-   * Get all of the available drivers.
-   *
-   * @return array
-   */
-  public static function getDrivers(): array
-  {
-    return self::DRIVERS;
-  }
+    public function unregister(string $name): self
+    {
+        unset($this->drivers[$name]);
+
+        return $this;
+    }
+
+    /**
+     * @return array<string, class-string<CurrencyDriverContract>>
+     */
+    public function drivers(): array
+    {
+        return $this->drivers;
+    }
+
+    /**
+     * @throws DriverNotFoundException
+     */
+    public function build(
+        string $name,
+        ?ClientInterface $httpClient = null,
+        ?RequestFactoryInterface $requestFactory = null,
+    ): CurrencyDriverContract {
+        if (!isset($this->drivers[$name])) {
+            throw new DriverNotFoundException("{$name} is not a valid driver.");
+        }
+
+        $class   = $this->drivers[$name];
+        $client  = $httpClient ?? $this->defaultClient();
+        $factory = $requestFactory ?? $this->defaultRequestFactory();
+
+        return new $class($client, $factory);
+    }
+
+    /**
+     * Static facade preserved for backwards compatibility.
+     *
+     * @throws DriverNotFoundException
+     */
+    public static function make(
+        string $name,
+        ?ClientInterface $httpClient = null,
+        ?RequestFactoryInterface $requestFactory = null,
+    ): CurrencyDriverContract {
+        return self::default()->build($name, $httpClient, $requestFactory);
+    }
+
+    /**
+     * @return array<string, class-string<CurrencyDriverContract>>
+     */
+    public static function getDrivers(): array
+    {
+        return self::default()->drivers();
+    }
+
+    public static function default(): self
+    {
+        return self::$defaultInstance ??= new self();
+    }
+
+    public static function setDefault(?self $instance): void
+    {
+        self::$defaultInstance = $instance;
+    }
+
+    private function defaultClient(): ClientInterface
+    {
+        if (!class_exists(GuzzleClient::class)) {
+            throw new RuntimeException(
+                'No PSR-18 HTTP client supplied and guzzlehttp/guzzle is not installed. '
+                . 'Either install guzzlehttp/guzzle, or pass a ClientInterface to DriverFactory::make().',
+            );
+        }
+
+        return new GuzzleClient();
+    }
+
+    private function defaultRequestFactory(): RequestFactoryInterface
+    {
+        if (!class_exists(GuzzleRequestFactory::class)) {
+            throw new RuntimeException(
+                'No PSR-17 RequestFactory supplied and http-interop/http-factory-guzzle is not installed. '
+                . 'Either install http-interop/http-factory-guzzle, or pass a RequestFactoryInterface to DriverFactory::make().',
+            );
+        }
+
+        return new GuzzleRequestFactory();
+    }
 }

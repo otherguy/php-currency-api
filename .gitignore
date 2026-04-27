@@ -1,9 +1,11 @@
 ### VisualStudioCode template
 .vscode/*
-!.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+### Local environment
+.env
 
 ### Composer template
 composer.phar
@@ -15,3 +17,8 @@ composer.phar
 ### PHPUnit
 build
 .phpunit.result.cache
+
+### Local agent/tooling scratch
+.code-review-graph/
+.docs/
+tasks/

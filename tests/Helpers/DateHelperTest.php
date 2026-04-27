@@ -1,44 +1,48 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Otherguy\Currency\Tests\Helpers;
+
+use DateTimeImmutable;
 use Otherguy\Currency\Helpers\DateHelper;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
-/**
- * DateHelperTest
- */
 class DateHelperTest extends TestCase
 {
+    #[Test]
+    public function format_returns_null_for_null_input(): void
+    {
+        $this->assertNull(DateHelper::format(null));
+    }
 
-  /** @test */
-  public function can_parse_a_date()
-  {
-    $this->assertEquals('23:15:03', DateHelper::parse('23h 15m 03s', 'H\h i\m s\s')->format('H:i:s'));
-  }
+    #[Test]
+    public function format_uses_iso_date_by_default(): void
+    {
+        $date = new DateTimeImmutable('2019-01-01 12:34:56');
+        $this->assertSame('2019-01-01', DateHelper::format($date));
+    }
 
-  /** @test */
-  public function can_format_a_date()
-  {
-    $this->assertEqualsWithDelta((new DateTime())->format('Y-m-d'), DateHelper::format('now', 'Y-m-d'), 0.1);
-    $this->assertEquals('2019-01-01', DateHelper::format(1546300800, 'Y-m-d'));
-    $this->assertEquals('2019-01-01', DateHelper::format('2019-01-01', 'Y-m-d'));
-    $this->assertEquals(DateHelper::today()->format('Y-m-d'), DateHelper::format(DateHelper::today(), 'Y-m-d'));
-  }
+    #[Test]
+    public function format_accepts_custom_format_string(): void
+    {
+        $date = new DateTimeImmutable('2019-01-01 12:34:56');
+        $this->assertSame('01.01.2019 12:34', DateHelper::format($date, 'd.m.Y H:i'));
+    }
 
-  /** @test */
-  public function can_create_a_date()
-  {
-    $this->assertEquals(1546300800, DateHelper::create('1.1.2019')->getTimestamp());
-  }
+    #[Test]
+    public function now_returns_current_timestamp(): void
+    {
+        $delta = DateHelper::now()->getTimestamp() - time();
+        $this->assertLessThanOrEqual(1, abs($delta));
+    }
 
-  /** @test */
-  public function can_get_current_date_and_time()
-  {
-    $this->assertEqualsWithDelta(new DateTime(), DateHelper::now(), 0.1);
-  }
-
-  /** @test */
-  public function can_get_current_date()
-  {
-    $this->assertEquals(new DateTime('today'), DateHelper::today());
-  }
+    #[Test]
+    public function today_returns_midnight_today(): void
+    {
+        $today = DateHelper::today();
+        $this->assertSame('00:00:00', $today->format('H:i:s'));
+        $this->assertSame((new DateTimeImmutable('today'))->format('Y-m-d'), $today->format('Y-m-d'));
+    }
 }

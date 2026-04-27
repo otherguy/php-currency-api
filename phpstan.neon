@@ -1,0 +1,25 @@
+parameters:
+  level: max
+  paths:
+    - src
+  treatPhpDocTypesAsCertain: false
+  tmpDir: build/phpstan
+  ignoreErrors:
+    -
+      identifier: cast.string
+      path: src/Drivers/*.php
+    -
+      identifier: cast.int
+      path: src/Drivers/*.php
+    -
+      identifier: encapsedStringPart.nonString
+      path: src/Drivers/*.php
+    -
+      identifier: binaryOp.invalid
+      path: src/Drivers/*.php
+    -
+      identifier: offsetAccess.nonOffsetAccessible
+      path: src/Drivers/*.php
+    -
+      identifier: argument.type
+      path: src/Drivers/*.php

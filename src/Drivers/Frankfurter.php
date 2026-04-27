@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace Otherguy\Currency\Drivers;
 
-use Brick\Math\BigDecimal;
-use Brick\Math\RoundingMode;
 use DateTimeInterface;
 use Otherguy\Currency\Currency;
 use Otherguy\Currency\Exceptions\ApiException;
 use Otherguy\Currency\Results\ConversionResult;
 use Override;
 
-class ExchangeRatesApi extends BaseCurrencyDriver
+class Frankfurter extends BaseCurrencyDriver
 {
-    protected string $apiURL       = 'api.apilayer.com/exchangerates_data';
+    protected string $apiURL       = 'api.frankfurter.dev/v1';
     protected string $baseCurrency = 'EUR';
 
     #[Override]
     public function accessKey(string $accessKey): static
     {
-        return $this->config('apikey', $accessKey);
+        throw new ApiException('Frankfurter does not require an API key.');
     }
 
     public function get(string|Currency|array $forCurrency = []): ConversionResult
@@ -29,10 +27,7 @@ class ExchangeRatesApi extends BaseCurrencyDriver
             $this->currencies($forCurrency);
         }
 
-        $response = $this->apiRequest('latest', [
-          'base'    => $this->getBaseCurrency(),
-          'symbols' => implode(',', $this->getSymbols()),
-        ]);
+        $response = $this->apiRequest('latest', $this->buildSymbolsParams());
 
         return new ConversionResult(
             (string) $response['base'],
@@ -57,10 +52,7 @@ class ExchangeRatesApi extends BaseCurrencyDriver
             throw new ApiException('Date needs to be set!');
         }
 
-        $response = $this->apiRequest($this->getDate(), [
-          'base'    => $this->getBaseCurrency(),
-          'symbols' => implode(',', $this->getSymbols()),
-        ]);
+        $response = $this->apiRequest($this->getDate(), $this->buildSymbolsParams());
 
         return new ConversionResult(
             (string) $response['base'],
@@ -91,53 +83,29 @@ class ExchangeRatesApi extends BaseCurrencyDriver
             $this->currencies = [Currency::code($toCurrency)];
         }
 
-        $target = $this->currencies[0] ?? null;
-        if ($target === null) {
+        if ($this->currencies === []) {
             throw new ApiException('A target currency is required for convert().');
         }
         if ($this->amount === null) {
             throw new ApiException('An amount is required for convert().');
         }
 
-        $params = [
-          'from'   => $this->getBaseCurrency(),
-          'to'     => $target,
-          'amount' => $this->amount,
-        ];
-
-        if ($this->getDate() !== null) {
-            $params['date'] = $this->getDate();
-        }
-
-        $response = $this->apiRequest('convert', $params);
-
-        $rate = BigDecimal::of((string) $response['result'])
-          ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HALF_UP);
-
-        return new ConversionResult(
-            $this->getBaseCurrency(),
-            isset($response['date']) ? (string) $response['date'] : $this->getDate(),
-            [$target => $rate],
-        );
+        return $this->getDate() === null ? $this->get() : $this->historical();
     }
 
     /**
-     * @param array<string, scalar> $params
-     *
-     * @return array<array-key, mixed>
+     * @return array<string, string>
      */
-    #[Override]
-    protected function apiRequest(string $endpoint, array $params = []): array
+    private function buildSymbolsParams(): array
     {
-        $response = parent::apiRequest($endpoint, $params);
+        $params = [
+          'base' => $this->getBaseCurrency(),
+        ];
 
-        if (!($response['success'] ?? false)) {
-            throw new ApiException(
-                (string) ($response['error']['info'] ?? $response['message'] ?? 'ExchangeRatesApi error'),
-                (int) ($response['error']['code'] ?? 0),
-            );
+        if ($this->getSymbols() !== []) {
+            $params['symbols'] = implode(',', $this->getSymbols());
         }
 
-        return $response;
+        return $params;
     }
 }

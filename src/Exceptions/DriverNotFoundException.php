@@ -1,11 +1,9 @@
-<?php namespace Otherguy\Currency\Exceptions;
+<?php
 
-/**
- * Class DriverNotFoundException
- *
- * @package Otherguy\Currency\Exceptions
- */
+declare(strict_types=1);
+
+namespace Otherguy\Currency\Exceptions;
+
 class DriverNotFoundException extends CurrencyException
 {
-
 }
