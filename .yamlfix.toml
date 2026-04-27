@@ -1,0 +1,19 @@
+# .yamlfix.toml
+# Configuration for YAML formatting and linting
+allow_duplicate_keys = false
+comments_min_spaces_from_content = 2
+comments_require_starting_space = true
+comments_whitelines = 1
+whitelines = 1
+section_whitelines = 1
+explicit_start = true
+indent_mapping = 2
+indent_offset = 2
+indent_sequence  = 4
+line_length = 300
+none_representation = ""
+quote_basic_values = false
+quote_keys_and_basic_values = false
+preserve_quotes = true
+quote_representation = '\"'
+sequence_style = "keep_style"

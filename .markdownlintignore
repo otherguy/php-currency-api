@@ -1,0 +1,4 @@
+vendor/
+build/
+.git/
+node_modules/

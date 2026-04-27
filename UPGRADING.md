@@ -2,7 +2,7 @@
 # Upgrading from 1.x
 
 | Area | 1.x | 2.0 |
-|---|---|---|
+| --- | --- | --- |
 | PHP | `>=7.3` | `^8.3` |
 | HTTP client | Hard-wired Guzzle | Any PSR-18 client + PSR-17 factory |
 | Currency catalog | `Symbol` constants | `Currency` backed enum (`Symbol` remains as a deprecation shim) |

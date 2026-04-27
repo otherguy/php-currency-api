@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file. The format 
 A full modernization. See the [README upgrade section](README.md#upgrading-from-1x) for migration steps.
 
 ### Added
+
 - `Otherguy\Currency\Currency` backed enum with one case per supported ISO-4217 code, plus `displayName()` and `tryFromCode()` helpers.
 - `Frankfurter` driver — free, key-less access to `api.frankfurter.dev`.
 - `CurrencyApi` driver — latest, historical, and conversion support for `api.currencyapi.com`.
@@ -20,6 +21,7 @@ A full modernization. See the [README upgrade section](README.md#upgrading-from-
 - `tests/Support/MockHttpClient.php` — in-process PSR-18 test double.
 
 ### Changed
+
 - **PHP 8.3+** required (was `>=7.3`).
 - HTTP layer is now **PSR-18 / PSR-17**. `BaseCurrencyDriver::__construct()` takes a `Psr\Http\Client\ClientInterface` and a `Psr\Http\Message\RequestFactoryInterface`.
 - `ConversionResult::rate()`, `convert()`, and `all()` now return `Brick\Math\BigDecimal` instead of `float`.
@@ -32,19 +34,23 @@ A full modernization. See the [README upgrade section](README.md#upgrading-from-
 - Test suite uses namespaced classes (`Otherguy\Currency\Tests\…`) with PHPUnit `#[Test]` attributes and an in-process PSR-18 mock.
 
 ### Deprecated
+
 - `Otherguy\Currency\Symbol` and its static helpers (`all()`, `name()`, `names()`). Kept as a shim that emits `E_USER_DEPRECATED` on first use; will be removed in 3.0. Use `Otherguy\Currency\Currency` instead.
 
 ### Removed
+
 - `nikic/php-parser` dependency (was unused at runtime).
 - Duplicate `phpunit/php-code-coverage` declaration (PHPUnit pulls it transitively).
 - `Helpers\DateHelper::parse()` and `create()`. Use `new DateTimeImmutable(...)` directly.
 - Travis CI configuration (`.travis.yml`), `.mergify.yml`, stale GitHub config files.
 
 ### Fixed
+
 - `ExchangeRatesApi` driver no longer hits a dead endpoint.
 - Currency math now uses arbitrary-precision decimals; round-trip rebasing (`setBaseCurrency`) is lossless within the configured scale (default 8).
 
 ### Security
+
 - HTTP requests default to TLS. `->secure()` is a no-op toggle to HTTPS; there is no opt-out to plaintext without subclassing.
 
 [2.0.0]: https://github.com/otherguy/php-currency-api/releases/tag/v2.0.0

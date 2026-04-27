@@ -28,22 +28,22 @@ You can find detailed instructions on how to upgrade from `1.x` to `2.x` in [UPG
 
 ## Features
 
-* Multiple drivers behind a single interface — switch providers by changing one string.
-* Fluent setter chain (`source`, `to`, `amount`, `date`, …) on every driver.
-* `ConversionResult` value object with lossless rebasing (`setBaseCurrency()`).
-* Hermetic test surface — inject any PSR-18 client, including in-memory mocks.
+- Multiple drivers behind a single interface — switch providers by changing one string.
+- Fluent setter chain (`source`, `to`, `amount`, `date`, …) on every driver.
+- `ConversionResult` value object with lossless rebasing (`setBaseCurrency()`).
+- Hermetic test surface — inject any PSR-18 client, including in-memory mocks.
 
 ## Supported APIs
 
-| Service                                              | Identifier          | Free tier without key |
-|------------------------------------------------------|---------------------|-----------------------|
-| [Frankfurter](https://www.frankfurter.dev)           | `frankfurter`       | ✅                     |
-| [FixerIO](https://fixer.io)                          | `fixerio`           | —                     |
-| [CurrencyLayer](https://currencylayer.com)           | `currencylayer`     | —                     |
-| [Open Exchange Rates](https://openexchangerates.org) | `openexchangerates` | —                     |
-| [APILayer Exchange Rates](https://apilayer.com/marketplace/exchangerates_data-api) | `exchangeratesapi`  | — |
-| [CurrencyAPI](https://currencyapi.com)               | `currencyapi`       | —                     |
-| [fastFOREX](https://fastforex.io)                    | `fastforex`         | —                     |
+| Service                                                                            | Identifier          |
+|------------------------------------------------------------------------------------|---------------------|
+| [Frankfurter](https://www.frankfurter.dev)                                         | `frankfurter`       |
+| [FixerIO](https://fixer.io)                                                        | `fixerio`           |
+| [CurrencyLayer](https://currencylayer.com)                                         | `currencylayer`     |
+| [Open Exchange Rates](https://openexchangerates.org)                               | `openexchangerates` |
+| [APILayer Exchange Rates](https://apilayer.com/marketplace/exchangerates_data-api) | `exchangeratesapi`  |
+| [CurrencyAPI](https://currencyapi.com)                                             | `currencyapi`       |
+| [fastFOREX](https://fastforex.io)                                                  | `fastforex`         |
 
 A `mock` driver is also bundled for testing without network access.
 
@@ -51,9 +51,9 @@ _Want another provider? [Open an issue](https://github.com/otherguy/php-currency
 
 ## Requirements
 
-* PHP **8.3** or higher.
-* A PSR-18 HTTP client and PSR-17 request factory of your choice.
-* An API account with the chosen provider, except for `frankfurter`.
+- PHP **8.3** or higher.
+- A PSR-18 HTTP client and PSR-17 request factory of your choice.
+- An API account with the chosen provider, except for `frankfurter`.
 
 ## Installation
 
@@ -148,7 +148,7 @@ Frankfurter has no API key — calling `accessKey()` on it throws `ApiException`
 Provider-specific key mapping:
 
 | Driver | `accessKey()` mapping |
-|---|---|
+| --- | --- |
 | `fixerio` | `access_key` query parameter |
 | `currencylayer` | `access_key` query parameter |
 | `openexchangerates` | `app_id` query parameter |
