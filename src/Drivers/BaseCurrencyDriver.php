@@ -200,7 +200,7 @@ abstract class BaseCurrencyDriver implements CurrencyDriverContract
         $response = $this->apiRequest('convert', $params);
 
         $rate = BigDecimal::of($this->responseString($response, 'result', static::class))
-          ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HALF_UP);
+          ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HalfUp);
 
         return new ConversionResult(
             $this->getBaseCurrency(),
