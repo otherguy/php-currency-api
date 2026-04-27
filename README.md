@@ -1,5 +1,7 @@
 # 💱 Wrapper for popular Currency Exchange Rate APIs
 
+![PHP Currency API](resources/open-graph-preview.png)
+
 _A PHP API Wrapper offering a unified, fluent programming interface for popular currency rate APIs._
 
 [![Version](https://img.shields.io/packagist/v/otherguy/php-currency-api.svg?style=flat-square)](https://packagist.org/packages/otherguy/php-currency-api)
