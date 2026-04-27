@@ -178,19 +178,19 @@ Each driver has its own default base currency: `EUR` for FixerIO, APILayer Excha
 
 ### Target currencies
 
-`to()` and `currencies()` are aliases. Pass a single currency, an array, or variadic arguments. Pass nothing (or an empty array) to ask for every currency the provider supports.
+`to()` and `currencies()` are aliases. Pass a single currency or an array. Pass nothing (or an empty array) to ask for every currency the provider supports.
 
 ```php
 $driver->to(Currency::BTC);
 $driver->currencies([Currency::BTC, Currency::EUR, Currency::USD]);
-$driver->to(Currency::EUR, Currency::GBP);
+$driver->to([Currency::EUR, Currency::GBP]);
 ```
 
 ### Latest rates
 
 ```php
 $driver->get();              // current rates for the configured target currencies
-$driver->get(Currency::DKK); // override base currency for this call
+$driver->get(Currency::DKK); // current rate for DKK
 ```
 
 ### Historical rates
@@ -211,7 +211,7 @@ $driver->convert(10.00, Currency::USD, Currency::THB);
 $driver->convert(122.50, Currency::NPR, Currency::EUR, new DateTimeImmutable('2019-01-01'));
 ```
 
-For providers without a native `/convert` endpoint (e.g. Frankfurter), the driver fetches the rate via `get()` / `historical()` and multiplies client-side using `BigDecimal`.
+For providers without a native `/convert` endpoint (e.g. Frankfurter), the driver fetches the rate via `get()` / `historical()` and returns a `ConversionResult` for the requested pair. Use `ConversionResult::convert()` when you need the converted amount as a `BigDecimal`.
 
 CurrencyAPI and fastFOREX both expose native latest conversion endpoints. For dated conversions, their drivers fetch historical rates and return a `ConversionResult` for the requested pair.
 
@@ -290,10 +290,13 @@ declare(strict_types=1);
 
 namespace Otherguy\Currency\Drivers;
 
+use Brick\Math\BigDecimal;
+use Brick\Math\RoundingMode;
 use DateTimeInterface;
 use Otherguy\Currency\Currency;
 use Otherguy\Currency\Exceptions\ApiException;
 use Otherguy\Currency\Results\ConversionResult;
+use Override;
 
 class MyProvider extends BaseCurrencyDriver
 {
@@ -301,6 +304,7 @@ class MyProvider extends BaseCurrencyDriver
     protected string $protocol     = 'https';
     protected string $baseCurrency = 'USD';
 
+    #[Override]
     public function get(string|Currency|array $forCurrency = []): ConversionResult
     {
         if ($forCurrency !== []) {
@@ -319,6 +323,7 @@ class MyProvider extends BaseCurrencyDriver
         );
     }
 
+    #[Override]
     public function historical(
         ?DateTimeInterface $date = null,
         string|Currency|array $forCurrency = [],
@@ -344,6 +349,7 @@ class MyProvider extends BaseCurrencyDriver
         );
     }
 
+    #[Override]
     public function convert(
         ?float $amount = null,
         string|Currency|null $fromCurrency = null,
@@ -376,17 +382,19 @@ class MyProvider extends BaseCurrencyDriver
             'to'     => $target,
             'amount' => $this->amount,
         ]);
+        $rate = BigDecimal::of((string) $response['result'])
+            ->dividedBy(BigDecimal::of((string) $this->amount), ConversionResult::DEFAULT_SCALE, RoundingMode::HalfUp);
 
         return new ConversionResult(
             $this->getBaseCurrency(),
             isset($response['date']) ? (string) $response['date'] : null,
-            [$target => $response['result']],
+            [$target => $rate],
         );
     }
 }
 ```
 
-For providers without a native conversion endpoint, fetch a rate through `get()` / `historical()` and multiply client-side with `BigDecimal`; [`Frankfurter`](src/Drivers/Frankfurter.php) is the compact example.
+For providers without a native conversion endpoint, fetch rates through `get()` / `historical()` and return the resulting `ConversionResult`; [`Frankfurter`](src/Drivers/Frankfurter.php) is the compact example.
 
 ### Driver authentication
 
@@ -521,9 +529,12 @@ The library exposes `Otherguy\Currency\Drivers\MockCurrencyDriver` for consumers
 
 ```php
 use Otherguy\Currency\Drivers\MockCurrencyDriver;
+use Otherguy\Currency\DriverFactory;
 
-$driver = (new MockCurrencyDriver(/* PSR-18 + factory */))
-    ->withRates(['EUR' => '0.92', 'GBP' => '0.79']);
+$driver = DriverFactory::make('mock');
+assert($driver instanceof MockCurrencyDriver);
+
+$driver->withRates(['EUR' => '0.92', 'GBP' => '0.79']);
 
 $driver->get()->rate('EUR'); // BigDecimal '0.92'
 ```
