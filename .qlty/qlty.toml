@@ -92,7 +92,7 @@ mode = "comment"
 # copy_configs_into_tool_install = false: keep phpstan.neon at the project
 #   root so its relative `path:` rules under ignoreErrors continue to match.
 [plugins.definitions.phpstan.drivers.lint]
-prepare_script = "~/.qlty/cache/tools/composer/generic-42cc848a9f5e/composer.phar install --no-scripts --ignore-platform-reqs --no-interaction --no-progress"
+prepare_script = "composer install --no-scripts --ignore-platform-reqs --no-interaction --no-progress"
 autoload_script = "--autoload-file=vendor/autoload.php"
 copy_configs_into_tool_install = false
 
