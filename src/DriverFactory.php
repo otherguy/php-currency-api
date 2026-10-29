@@ -6,6 +6,7 @@ namespace Otherguy\Currency;
 
 use GuzzleHttp\Client as GuzzleClient;
 use Http\Factory\Guzzle\RequestFactory as GuzzleRequestFactory;
+use Otherguy\Currency\Drivers\AllRatesToday;
 use Otherguy\Currency\Drivers\CurrencyApi;
 use Otherguy\Currency\Drivers\CurrencyDriverContract;
 use Otherguy\Currency\Drivers\CurrencyLayer;
@@ -43,6 +44,7 @@ class DriverFactory
             'frankfurter'       => Frankfurter::class,
             'currencyapi'       => CurrencyApi::class,
             'fastforex'         => FastForex::class,
+            'allratestoday'     => AllRatesToday::class,
         ];
     }
 

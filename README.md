@@ -44,6 +44,7 @@ You can find detailed instructions on how to upgrade from `1.x` to `2.x` in [UPG
 | [APILayer Exchange Rates](https://apilayer.com/marketplace/exchangerates_data-api) | `exchangeratesapi`  |
 | [CurrencyAPI](https://currencyapi.com)                                             | `currencyapi`       |
 | [fastFOREX](https://fastforex.io)                                                  | `fastforex`         |
+| [AllRatesToday](https://allratestoday.com/open-api/)                               | `allratestoday`     |
 
 A `mock` driver is also bundled for testing without network access.
 
@@ -53,7 +54,7 @@ _Want another provider? [Open an issue](https://github.com/otherguy/php-currency
 
 - PHP **8.3** or higher.
 - A PSR-18 HTTP client and PSR-17 request factory of your choice.
-- An API account with the chosen provider, except for `frankfurter`.
+- An API account with the chosen provider, except for `frankfurter` (and `allratestoday`, where a key is optional).
 
 ## Installation
 
@@ -143,7 +144,7 @@ Most providers require authentication. `accessKey()` is sugar for `config('acces
 $driver->accessKey('YOUR_KEY');
 ```
 
-Frankfurter has no API key — calling `accessKey()` on it throws `ApiException`. CurrencyAPI is the exception to the query-string rule: its driver sends the key in the `apikey` request header.
+Frankfurter has no API key — calling `accessKey()` on it throws `ApiException`. AllRatesToday's key is optional and goes into the `Authorization: Bearer` header. CurrencyAPI is the exception to the query-string rule: its driver sends the key in the `apikey` request header.
 
 Provider-specific key mapping:
 
@@ -156,6 +157,7 @@ Provider-specific key mapping:
 | `currencyapi` | `apikey` request header |
 | `fastforex` | `api_key` query parameter |
 | `frankfurter` | no key; throws `ApiException` |
+| `allratestoday` | optional; `Authorization: Bearer` header |
 
 ### Configuration options
 
@@ -174,7 +176,7 @@ $driver->from(Currency::USD);
 $driver->source('USD');
 ```
 
-Each driver has its own default base currency: `EUR` for FixerIO, APILayer Exchange Rates, and Frankfurter; `USD` for CurrencyLayer, Open Exchange Rates, CurrencyAPI, fastFOREX, and the mock driver. Most providers only allow base-currency changes on paid plans — they'll respond with an error envelope which the driver translates into `ApiException`.
+Each driver has its own default base currency: `EUR` for FixerIO, APILayer Exchange Rates, Frankfurter, and AllRatesToday; `USD` for CurrencyLayer, Open Exchange Rates, CurrencyAPI, fastFOREX, and the mock driver. Most providers only allow base-currency changes on paid plans — they'll respond with an error envelope which the driver translates into `ApiException`.
 
 ### Target currencies
 
@@ -211,9 +213,27 @@ $driver->convert(10.00, Currency::USD, Currency::THB);
 $driver->convert(122.50, Currency::NPR, Currency::EUR, new DateTimeImmutable('2019-01-01'));
 ```
 
-For providers without a native `/convert` endpoint (e.g. Frankfurter), the driver fetches the rate via `get()` / `historical()` and returns a `ConversionResult` for the requested pair. Use `ConversionResult::convert()` when you need the converted amount as a `BigDecimal`.
+For providers without a native `/convert` endpoint (e.g. Frankfurter, AllRatesToday), the driver fetches the rate via `get()` / `historical()` and returns a `ConversionResult` for the requested pair. Use `ConversionResult::convert()` when you need the converted amount as a `BigDecimal`.
 
 CurrencyAPI and fastFOREX both expose native latest conversion endpoints. For dated conversions, their drivers fetch historical rates and return a `ConversionResult` for the requested pair.
+
+### Central bank tables (AllRatesToday)
+
+The `allratestoday` driver is key-less like Frankfurter and serves the ECB reference table by default. It can also serve the latest official table of one central bank — including banks that no other free provider carries, such as the Saudi Central Bank (`sama`), Central Bank of the UAE (`cbuae`), Qatar Central Bank (`qcb`), Bank of Korea (`bok`), Reserve Bank of New Zealand (`rbnz`), State Bank of Vietnam (`sbv`) and Bangladesh Bank (`bb`). Codes are listed at [allratestoday.com/central-bank-rates-api/institutions/](https://allratestoday.com/central-bank-rates-api/institutions/).
+
+```php
+$driver = DriverFactory::make('allratestoday');
+
+// SAMA's official table, rebased on SAR
+$driver->bank('sama')->from(Currency::SAR)->to([Currency::USD, Currency::EUR])->get();
+
+$driver->config('bank', 'rbnz'); // same thing via config()
+$driver->bank(null);             // back to the ECB table
+```
+
+When a bank publishes several rate types for one pair, the driver uses the reference rate, else the middle/official rate, else the mean of the buy and sell rates. The latest-table endpoints publish the latest table only, so `historical()` and dated `convert()` calls throw `ApiException`.
+
+Key-less use is for non-commercial projects and asks for a visible link to allratestoday.com where the rates are shown ([terms](https://allratestoday.com/terms/#attribution)). With `accessKey()` (free or paid key) the bank table is read from the keyed `/api/v1/central-bank/{bank}/latest` endpoint instead.
 
 ### Fluent chain
 

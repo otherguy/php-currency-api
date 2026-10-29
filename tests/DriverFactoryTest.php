@@ -41,7 +41,7 @@ class DriverFactoryTest extends TestCase
     {
         $drivers = DriverFactory::getDrivers();
 
-        foreach (['mock', 'fixerio', 'currencylayer', 'openexchangerates', 'exchangeratesapi', 'frankfurter', 'currencyapi', 'fastforex'] as $name) {
+        foreach (['mock', 'fixerio', 'currencylayer', 'openexchangerates', 'exchangeratesapi', 'frankfurter', 'currencyapi', 'fastforex', 'allratestoday'] as $name) {
             $this->assertArrayHasKey($name, $drivers);
         }
     }

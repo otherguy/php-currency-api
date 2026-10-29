@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `AllRatesToday` driver — key-less ECB table from `allratestoday.com/api/open`; `bank()` / `config('bank', …)` for the official table of one of 120+ central banks (one rate type picked per pair), optional `accessKey()` for the keyed endpoint.
+
 ## [2.0.0] — 2026-04-27
 
 A full modernization. See the [README upgrade section](README.md#upgrading-from-1x) for migration steps.
