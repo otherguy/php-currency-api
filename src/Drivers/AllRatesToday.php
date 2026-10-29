@@ -17,20 +17,33 @@ use Override;
  *
  * By default the driver serves the European Central Bank reference table re-based on the
  * source currency. With `bank()` (or `config('bank', …)`) it serves the latest official table
- * of one central bank instead, e.g. `sama`, `cbuae`, `bok`, `rbnz` or `sbv`. The open endpoints
- * publish the latest table only, so `historical()` is not available without an API key.
+ * of one central bank instead, e.g. `sama`, `cbuae`, `bok`, `rbnz` or `sbv`. The key-less
+ * endpoints are for non-commercial use; with `accessKey()` the bank table is read from the
+ * keyed endpoint instead. Both publish the latest table only, so `historical()` throws.
  */
 class AllRatesToday extends BaseCurrencyDriver
 {
-    protected string $apiURL       = 'allratestoday.com/api/open';
+    /** Rate types a bank may publish for one pair, most to least preferred. */
+    private const RATE_TYPE_PREFERENCE = ['reference', 'middle', 'mid', 'official'];
+
+    protected string $apiURL       = 'allratestoday.com/api';
     protected string $baseCurrency = 'EUR';
 
     private ?string $bank = null;
 
+    private bool $hasAccessKey = false;
+
+    /**
+     * Optional. A key (free or paid, https://allratestoday.com/register) is sent as a Bearer token
+     * and switches the central bank table to the keyed endpoint.
+     */
     #[Override]
     public function accessKey(string $accessKey): static
     {
-        throw new ApiException('AllRatesToday open endpoints do not take an API key.');
+        $this->httpHeaders['Authorization'] = 'Bearer ' . $accessKey;
+        $this->hasAccessKey = true;
+
+        return $this;
     }
 
     /**
@@ -76,8 +89,8 @@ class AllRatesToday extends BaseCurrencyDriver
         string|Currency|array $forCurrency = [],
     ): ConversionResult {
         throw new ApiException(
-            'AllRatesToday open endpoints serve the latest published table only; '
-            . 'dated rates need an API key (https://allratestoday.com/docs/).',
+            'AllRatesToday latest-table endpoints serve the latest published table only; '
+            . 'dated rates are a separate paid endpoint (https://allratestoday.com/docs/).',
         );
     }
 
@@ -116,7 +129,7 @@ class AllRatesToday extends BaseCurrencyDriver
 
     private function getEcbRates(): ConversionResult
     {
-        $response = $this->apiRequest('latest/' . $this->getBaseCurrency());
+        $response = $this->apiRequest('open/latest/' . $this->getBaseCurrency());
 
         if (($response['result'] ?? null) !== 'success') {
             throw new ApiException($this->optionalResponseString($response, 'error') ?? 'AllRatesToday returned an unexpected response.');
@@ -133,18 +146,19 @@ class AllRatesToday extends BaseCurrencyDriver
 
     private function getBankRates(string $bank): ConversionResult
     {
-        $response = $this->apiRequest('central-bank/' . rawurlencode($bank));
+        $endpoint = $this->hasAccessKey
+            ? 'v1/central-bank/' . rawurlencode($bank) . '/latest'
+            : 'open/central-bank/' . rawurlencode($bank);
+        $response = $this->apiRequest($endpoint);
 
         $table = $response['rates'] ?? null;
         if (!is_array($table)) {
             throw new ApiException($this->optionalResponseString($response, 'error') ?? "AllRatesToday returned no table for central bank {$bank}.");
         }
 
-        // Each row says "1 base = value quote". Banks publish either foreign-per-home (the quote
-        // is the home currency) or home-per-foreign (the base is), so the home currency is the
-        // code common to every row.
-        $rows = [];
-        $seen = [];
+        // Each row says "1 base = value quote" and carries a rate type. Collect the values per pair
+        // and type first, then pick one rate per pair.
+        $valuesByPair = [];
         foreach ($table as $row) {
             if (!is_array($row)) {
                 continue;
@@ -153,13 +167,26 @@ class AllRatesToday extends BaseCurrencyDriver
             $base  = $row['base'] ?? null;
             $quote = $row['quote'] ?? null;
             $value = $row['value'] ?? null;
-            if (!is_string($base) || !is_string($quote) || !is_numeric($value) || (float) $value <= 0) {
+            $type  = $row['type'] ?? 'reference';
+            if (!is_string($base) || !is_string($quote) || !is_numeric($value) || (float) $value <= 0 || !is_string($type)) {
                 continue;
             }
 
-            $base   = strtoupper($base);
-            $quote  = strtoupper($quote);
-            $rows[] = [$base, $quote, BigDecimal::of((string) $value)];
+            $valuesByPair[strtoupper($base) . '/' . strtoupper($quote)][strtolower($type)] = BigDecimal::of((string) $value);
+        }
+
+        // Banks publish either foreign-per-home (the quote is the home currency) or
+        // home-per-foreign (the base is), so the home currency is the code common to every row.
+        $rows = [];
+        $seen = [];
+        foreach ($valuesByPair as $pair => $byType) {
+            $value = $this->pickRateType($byType);
+            if ($value === null) {
+                continue;
+            }
+
+            [$base, $quote] = explode('/', (string) $pair);
+            $rows[]       = [$base, $quote, $value];
             $seen[$base]  = ($seen[$base] ?? 0) + 1;
             $seen[$quote] = ($seen[$quote] ?? 0) + 1;
         }
@@ -196,6 +223,27 @@ class AllRatesToday extends BaseCurrencyDriver
             $this->responseString($response, 'rate_date', 'AllRatesToday'),
             $this->pickSymbols($rates, "central bank {$bank}"),
         );
+    }
+
+    /**
+     * One rate for a pair: the reference rate, else middle/mid/official, else the mean of a buy
+     * and a sell rate, else the only rate there is.
+     *
+     * @param array<string, BigDecimal> $byType
+     */
+    private function pickRateType(array $byType): ?BigDecimal
+    {
+        foreach (self::RATE_TYPE_PREFERENCE as $type) {
+            if (isset($byType[$type])) {
+                return $byType[$type];
+            }
+        }
+
+        if (isset($byType['buy'], $byType['sell'])) {
+            return $byType['buy']->plus($byType['sell'])->dividedBy(2, ConversionResult::DEFAULT_SCALE * 2, RoundingMode::HalfUp);
+        }
+
+        return count($byType) === 1 ? array_values($byType)[0] : null;
     }
 
     /**

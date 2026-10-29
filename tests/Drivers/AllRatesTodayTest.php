@@ -35,12 +35,46 @@ class AllRatesTodayTest extends TestCase
         $this->driver = $driver;
     }
 
+    // Rows of several types for one pair; the reference row wins, else the buy/sell mean.
+    private const BB_BODY = '{"bank":"bb","rate_date":"2026-10-28","rates":[{"base":"EUR","quote":"BDT","type":"buy","value":137},{"base":"EUR","quote":"BDT","type":"sell","value":139},{"base":"USD","quote":"BDT","type":"buy","value":119},{"base":"USD","quote":"BDT","type":"reference","value":120},{"base":"USD","quote":"BDT","type":"sell","value":121}]}';
+
     #[Test]
-    public function access_key_is_rejected(): void
+    public function access_key_is_sent_as_bearer_token_and_selects_the_keyed_bank_endpoint(): void
     {
-        $this->expectException(ApiException::class);
-        $this->expectExceptionMessage('AllRatesToday open endpoints do not take an API key.');
-        $this->driver->accessKey('any');
+        $this->harness->http->enqueue(JsonResponse::ok(self::SAMA_BODY));
+
+        $result = $this->driver->accessKey('art_live_test')->bank('sama')->from(Currency::SAR)->to(Currency::USD)->get();
+
+        $this->assertSame('0.26666667', (string) $result->rate(Currency::USD));
+
+        $request = $this->harness->http->lastRequest();
+        $this->assertNotNull($request);
+        $this->assertSame('https://allratestoday.com/api/v1/central-bank/sama/latest', (string) $request->getUri());
+        $this->assertSame('Bearer art_live_test', $request->getHeaderLine('Authorization'));
+    }
+
+    #[Test]
+    public function without_a_key_the_open_bank_endpoint_is_used(): void
+    {
+        $this->harness->http->enqueue(JsonResponse::ok(self::SAMA_BODY));
+
+        $this->driver->bank('sama')->from(Currency::SAR)->get();
+
+        $request = $this->harness->http->lastRequest();
+        $this->assertNotNull($request);
+        $this->assertSame('https://allratestoday.com/api/open/central-bank/sama', (string) $request->getUri());
+        $this->assertFalse($request->hasHeader('Authorization'));
+    }
+
+    #[Test]
+    public function one_rate_type_is_picked_per_pair(): void
+    {
+        $this->harness->http->enqueue(JsonResponse::ok(self::BB_BODY));
+
+        $result = $this->driver->bank('bb')->from(Currency::BDT)->get();
+
+        $this->assertSame('0.00833333', (string) $result->rate(Currency::USD)); // 1/120 reference, not buy or sell
+        $this->assertSame('0.00724638', (string) $result->rate(Currency::EUR)); // 1/138 buy-sell mean
     }
 
     #[Test]
@@ -174,10 +208,10 @@ class AllRatesTodayTest extends TestCase
     }
 
     #[Test]
-    public function historical_rates_need_an_api_key(): void
+    public function historical_rates_are_not_served(): void
     {
         $this->expectException(ApiException::class);
-        $this->expectExceptionMessage('dated rates need an API key');
+        $this->expectExceptionMessage('dated rates are a separate paid endpoint');
         $this->driver->historical(new DateTimeImmutable('2020-04-01'), [Currency::USD]);
     }
 
@@ -193,7 +227,7 @@ class AllRatesTodayTest extends TestCase
     }
 
     #[Test]
-    public function convert_with_a_date_needs_an_api_key(): void
+    public function convert_with_a_date_is_not_served(): void
     {
         $this->expectException(ApiException::class);
         $this->driver->convert(10.0, Currency::EUR, Currency::USD, new DateTimeImmutable('2020-04-01'));

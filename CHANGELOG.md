@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ### Added
 
-- `AllRatesToday` driver — free, key-less access to `allratestoday.com/api/open` (ECB table by default; `bank()` / `config('bank', …)` for the official table of one of 120+ central banks).
+- `AllRatesToday` driver — key-less ECB table from `allratestoday.com/api/open`; `bank()` / `config('bank', …)` for the official table of one of 120+ central banks (one rate type picked per pair), optional `accessKey()` for the keyed endpoint.
 
 ## [2.0.0] — 2026-04-27
 

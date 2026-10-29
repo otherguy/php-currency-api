@@ -54,7 +54,7 @@ _Want another provider? [Open an issue](https://github.com/otherguy/php-currency
 
 - PHP **8.3** or higher.
 - A PSR-18 HTTP client and PSR-17 request factory of your choice.
-- An API account with the chosen provider, except for `frankfurter` and `allratestoday`.
+- An API account with the chosen provider, except for `frankfurter` (and `allratestoday`, where a key is optional).
 
 ## Installation
 
@@ -144,7 +144,7 @@ Most providers require authentication. `accessKey()` is sugar for `config('acces
 $driver->accessKey('YOUR_KEY');
 ```
 
-Frankfurter and AllRatesToday have no API key — calling `accessKey()` on them throws `ApiException`. CurrencyAPI is the exception to the query-string rule: its driver sends the key in the `apikey` request header.
+Frankfurter has no API key — calling `accessKey()` on it throws `ApiException`. AllRatesToday's key is optional and goes into the `Authorization: Bearer` header. CurrencyAPI is the exception to the query-string rule: its driver sends the key in the `apikey` request header.
 
 Provider-specific key mapping:
 
@@ -157,7 +157,7 @@ Provider-specific key mapping:
 | `currencyapi` | `apikey` request header |
 | `fastforex` | `api_key` query parameter |
 | `frankfurter` | no key; throws `ApiException` |
-| `allratestoday` | no key; throws `ApiException` |
+| `allratestoday` | optional; `Authorization: Bearer` header |
 
 ### Configuration options
 
@@ -231,7 +231,9 @@ $driver->config('bank', 'rbnz'); // same thing via config()
 $driver->bank(null);             // back to the ECB table
 ```
 
-The open endpoints publish the latest table only, so `historical()` and dated `convert()` calls throw `ApiException`. Key-less use asks for a visible link to allratestoday.com where the rates are shown ([terms](https://allratestoday.com/terms/#attribution)).
+When a bank publishes several rate types for one pair, the driver uses the reference rate, else the middle/official rate, else the mean of the buy and sell rates. The latest-table endpoints publish the latest table only, so `historical()` and dated `convert()` calls throw `ApiException`.
+
+Key-less use is for non-commercial projects and asks for a visible link to allratestoday.com where the rates are shown ([terms](https://allratestoday.com/terms/#attribution)). With `accessKey()` (free or paid key) the bank table is read from the keyed `/api/v1/central-bank/{bank}/latest` endpoint instead.
 
 ### Fluent chain
 
